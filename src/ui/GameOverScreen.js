@@ -56,6 +56,10 @@ export const GameOverScreen = {
           </li>
         </ul>
 
+        <p class="over__ghost" v-if="results.ghostSaved">
+          Guardada como fantasma. La próxima partida de hoy correrá contra ella.
+        </p>
+
         <div class="over__records" v-if="records.length">
           <p class="over__records-title">Récord personal</p>
           <ul>

@@ -118,6 +118,17 @@ export const HudOverlay = {
         Viendo a <b>{{ m.spectating }}</b>
       </p>
 
+      <!-- Fantasma del desafío diario -->
+      <div class="ghost-hud" v-if="snap.ghost">
+        <span class="ghost-hud__label">
+          {{ snap.ghost.finished ? 'Marca a batir' : 'Compitiendo contra' }}
+        </span>
+        <span class="ghost-hud__name">{{ snap.ghost.name }}</span>
+        <span class="ghost-hud__score" :class="{ 'is-ahead': (m.primary?.value ?? 0) >= snap.ghost.score }">
+          {{ snap.ghost.score }}
+        </span>
+      </div>
+
       <!-- Elección de carta (Nido) — congela el mundo -->
       <div class="cards" v-if="m.cards">
         <h2 class="cards__title">Elige una mejora</h2>

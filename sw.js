@@ -53,6 +53,7 @@ const PRECACHE = [
   'src/pwa.js',
   'src/meta/achievements.js',
   'src/meta/cosmetics.js',
+  'src/meta/ghost.js',
   'src/meta/profile.js',
   'src/meta/storage.js',
   'src/modes/classic.js',

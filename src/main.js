@@ -38,7 +38,9 @@ import { instantiateMode, getMode, MODES } from './modes/index.js';
 import { Profile } from './meta/profile.js';
 import { sanitizeAppearance } from './meta/cosmetics.js';
 import { evaluate } from './meta/achievements.js';
-import { seedFromDate } from './engine/rng.js';
+import { seedFromDate, dateKey } from './engine/rng.js';
+import { GhostRecorder, GhostPlayer, validateGhost } from './meta/ghost.js';
+import { Snake } from './entities/Snake.js';
 import { registerServiceWorker, WakeLock, installPrompt, requestedMode } from './pwa.js';
 
 import { MenuScreen } from './ui/MenuScreen.js';
@@ -140,6 +142,8 @@ const app = createApp({
     let audioUnlocked = false;
     let wakeLock = null;
     let promptInstall = () => {};
+    let recorder = null;      // graba tu partida del desafío diario
+    let ghost = null;         // reproduce la partida contra la que compites
 
     // ── Preparación inicial ────────────────────────────────
     sanitizeAppearance(profile.appearance, profile);
@@ -224,6 +228,8 @@ const app = createApp({
       world?.destroy();
       world = null;
       loop = null;
+      recorder = null;
+      ghost = null;
     }
 
     async function startGame(modeId) {
@@ -295,6 +301,41 @@ const app = createApp({
       canvasEl.value.addEventListener('contextmenu', onContext);
       cleanups.push(() => canvasEl.value?.removeEventListener('contextmenu', onContext));
 
+      // ── Fantasmas: solo en el desafío diario, que es el único modo con un
+      // mundo idéntico para todos y por tanto el único donde comparar tiene
+      // sentido. En los demás, competir contra una trayectoria de otro mapa no
+      // significaría nada.
+      recorder = null;
+      ghost = null;
+      if (modeId === 'daily') {
+        const hoy = dateKey();
+        recorder = new GhostRecorder({
+          seed, dateKey: hoy, mode: modeId,
+          name: world.playerConfig.name,
+          skin: { ...profile.appearance },
+        });
+
+        const rival = profile.bestGhost(hoy);
+        if (rival) {
+          const check = validateGhost(rival);
+          if (check.ok) {
+            // El fantasma es una serpiente aparte que NO entra en world.snakes:
+            // no colisiona, no come y los bots no lo ven. Si participara, el
+            // mundo dejaría de ser el mismo para todos y el desafío diario
+            // perdería su sentido.
+            const fantasma = new Snake({
+              x: 0, y: 0, angle: 0,
+              skin: buildSkin(rival.skin, theme.value),
+              name: rival.name || 'Tu récord',
+              mass: 14,
+            });
+            ghost = new GhostPlayer(rival, fantasma);
+          } else {
+            console.warn('[fantasma] registro descartado:', check.razon);
+          }
+        }
+      }
+
       if (world.player) camera.snapTo(world.player.head.x, world.player.head.y);
 
       // ── Bucle ──
@@ -329,7 +370,17 @@ const app = createApp({
       fx.update(dt);
       sfx?.update(dt, world);
 
+      recorder?.tick(dt, world.player);
+      ghost?.update(dt);
+
       snap.value = world.snapshot();
+      if (ghost) {
+        snap.value.ghost = {
+          name: ghost.record.name,
+          score: ghost.score,
+          finished: ghost.finished,
+        };
+      }
       if (world.over) finish();
     }
 
@@ -344,13 +395,24 @@ const app = createApp({
       camera.update(rawDt, target, world.bounds, fx.shake);
       if (bonus) camera.zoom = Math.max(0.4, camera.zoom - bonus);
 
-      renderer.draw(world, camera, theme.value, fx, alpha, rawDt, input);
+      renderer.draw(world, camera, theme.value, fx, alpha, rawDt, input, ghost);
     }
 
     function finish() {
       if (screen.value !== 'game') return;
       loop.setPaused(true);
       results.value = world.results;
+
+      // Guardar tu partida como fantasma, si mejora la anterior de hoy.
+      if (recorder) {
+        recorder.stop();
+        const registro = recorder.build(world.results.score ?? 0);
+        const check = registro ? validateGhost(registro) : { ok: false, razon: 'muy corta' };
+        if (check.ok) {
+          const mejorado = profile.saveGhost(registro.date, registro);
+          results.value = { ...results.value, ghostSaved: mejorado, ghostRecord: registro };
+        }
+      }
       records.value = profile.recordGame({
         modeId: currentModeId.value,
         results: world.results,

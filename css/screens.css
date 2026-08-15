@@ -548,6 +548,43 @@
   color: var(--text-2);
 }
 
+/* Marcador del fantasma. Va bajo el ranking, con el que forma pareja: uno es
+   la competencia de esta partida y el otro la de la jornada. */
+.ghost-hud {
+  position: absolute;
+  top: 118px; right: max(14px, env(safe-area-inset-right));
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+  text-shadow: 0 1px 3px rgba(0,0,0,.8);
+}
+.ghost-hud__label {
+  font-size: var(--fs-xs);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.ghost-hud__name { font-size: var(--fs-sm); color: var(--text-2); }
+.ghost-hud__score {
+  font-size: calc(var(--fs-lg) * var(--hud-scale));
+  font-weight: 700;
+  color: var(--warn);
+  font-variant-numeric: tabular-nums;
+}
+/* Verde cuando vas por delante: es la única lectura que importa de un vistazo. */
+.ghost-hud__score.is-ahead { color: var(--ok); }
+
+.over__ghost {
+  padding: 10px 14px;
+  border-left: 3px solid var(--accent);
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+  background: var(--bg-2);
+  font-size: var(--fs-sm);
+  color: var(--text-2);
+  text-align: left;
+}
+
 /* ── Cartas (Nido) ── */
 .cards {
   position: absolute;

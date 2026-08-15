@@ -294,6 +294,34 @@ export class Snake {
     if (this.brain) this.brain.reset();
   }
 
+  /**
+   * Coloca la cabeza en una posición dada y deja que el cuerpo la siga.
+   *
+   * Es la vía de entrada para los fantasmas: se reproduce la trayectoria
+   * grabada y el cuerpo se reconstruye con la MISMA cadena que usa una
+   * serpiente viva, así que el fantasma se mueve y arrastra igual que el
+   * original sin necesidad de haber grabado su cuerpo entero.
+   */
+  setReplayPose(x, y, mass) {
+    const prevX = this._head.x, prevY = this._head.y;
+    this.mass = mass;
+    this._radius = radiusForMass(mass);
+
+    this._head.x = x;
+    this._head.y = y;
+    this.spine[0] = x;
+    this.spine[1] = y;
+
+    const moved = Math.hypot(x - prevX, y - prevY);
+    this.traveled += moved;
+    this.angle = moved > 0.01 ? Math.atan2(y - prevY, x - prevX) : this.angle;
+    this.targetAngle = this.angle;
+
+    this._followChain();
+    this._fitNodeCount();
+    this._updateBounds();
+  }
+
   /** Punto del espinazo más cercano a (x, y). Lo usa la IA para el cerco. */
   nearestSpineIndex(x, y) {
     let best = 0, bestD = Infinity;

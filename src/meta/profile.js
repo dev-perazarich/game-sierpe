@@ -162,6 +162,24 @@ export class Profile {
     }
   }
 
+  /* ── Fantasmas ─────────────────────────────────────────
+   * Se guarda el mejor registro propio por fecha, y solo el de hoy: acumular
+   * históricos llenaría localStorage sin que nadie los mire.
+   */
+
+  bestGhost(dateKey) {
+    const doc = load('ghost', { date: null, record: null }, 1);
+    return doc.date === dateKey ? doc.record : null;
+  }
+
+  /** @returns {boolean} true si el registro mejora al guardado */
+  saveGhost(dateKey, record) {
+    const previo = this.bestGhost(dateKey);
+    if (previo && previo.score >= record.score) return false;
+    save('ghost', { date: dateKey, record }, 1);
+    return true;
+  }
+
   summary() {
     const s = this.stats;
     return [

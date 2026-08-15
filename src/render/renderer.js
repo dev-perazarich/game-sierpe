@@ -64,7 +64,7 @@ export class Renderer {
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 
-  draw(world, camera, theme, fx, alpha, dt, input = null) {
+  draw(world, camera, theme, fx, alpha, dt, input = null, ghost = null) {
     const ctx = this.ctx;
     const q = this.quality;
     this.time += dt;
@@ -93,6 +93,7 @@ export class Renderer {
     world.mode.drawOver?.(ctx, world, theme, this.time, view);
 
     const visible = this._drawSnakes(ctx, world, view, theme, camera, q, fx);
+    this._drawGhost(ctx, ghost, view, theme, q);
 
     fx.drawWorld(ctx);
     ctx.restore();
@@ -205,6 +206,23 @@ export class Renderer {
 
     this.stats.snakes = visible.length;
     return visible;
+  }
+
+  /**
+   * El fantasma se dibuja translúcido y sin efectos, para que en ningún momento
+   * pueda confundirse con un rival real. Es una referencia, no un obstáculo:
+   * atravesarlo no hace nada.
+   */
+  _drawGhost(ctx, ghost, view, theme, quality) {
+    if (!ghost) return;
+    const s = ghost.snake;
+    const b = s.bounds;
+    if (b.maxX < view.minX || b.minX > view.maxX || b.maxY < view.minY || b.minY > view.maxY) return;
+
+    ctx.save();
+    ctx.globalAlpha = ghost.finished ? 0.22 : 0.42;
+    drawSnake(ctx, s, theme, { quality, lod: 1, time: this.time });
+    ctx.restore();
   }
 
   /** Viñeta de aviso al acercarse al borde letal. */
