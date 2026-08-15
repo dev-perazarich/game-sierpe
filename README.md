@@ -86,11 +86,34 @@ el área de juego visible sea comparable en un móvil y en un monitor.
 
 ## Publicarlo
 
-Es un sitio estático puro, así que no necesita configuración:
+Es un sitio estático puro y no necesita compilarse.
 
-- **Vercel** — importa el repositorio, *Framework Preset* en `Other`, deja el
-  comando de compilación y el directorio de salida vacíos.
-- **GitHub Pages / Netlify / Cloudflare Pages** — sirve la raíz del repositorio.
+**Vercel** — importa el repositorio, *Framework Preset* en `Other`, y deja
+vacíos el comando de compilación y el directorio de salida. El
+[`vercel.json`](vercel.json) incluido se encarga del resto.
+
+> **No añadas un `package.json`.** En cuanto exista, Vercel deja de tratar el
+> proyecto como estático e intenta compilarlo.
+
+Las cabeceras de `vercel.json` no son decorativas: `sw.js`, `index.html` y los
+módulos se sirven con `must-revalidate`. Sin eso, el navegador cachea el service
+worker y los jugadores se quedan **permanentemente** en la versión que
+instalaron la primera vez, sin ningún síntoma visible. Los iconos y Vue, que no
+cambian, sí llevan caché larga.
+
+**GitHub Pages / Netlify / Cloudflare Pages** — sirve la raíz del repositorio y
+replica esas cabeceras de caché en la configuración equivalente.
+
+### Después de desplegar
+
+1. Abre la web, recarga y comprueba en las herramientas de desarrollo que el
+   service worker queda `activated`.
+2. Pon el móvil en modo avión tras la primera carga: el juego debe arrancar.
+3. Instálalo y comprueba que abre a pantalla completa, sin barra de navegador.
+
+> Si activas Vercel Web Analytics, inyecta un script externo: dejarían de ser
+> ciertas las afirmaciones de este README sobre no tener telemetría ni
+> dependencias externas, y el juego dejaría de funcionar sin conexión tal cual.
 
 ---
 
