@@ -1,0 +1,655 @@
+/* ═══════════════════════════════════════════════════════════
+   screens.css — Menú, HUD de partida, pausa y pantalla final.
+═══════════════════════════════════════════════════════════ */
+
+.screen {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* ═══════════ MENÚ ═══════════ */
+
+.screen--menu {
+  display: grid;
+  place-items: center;
+  overflow-y: auto;
+  background:
+    radial-gradient(120% 80% at 50% -10%, var(--surface) 0%, transparent 60%),
+    var(--bg);
+  padding: var(--sp-5) var(--sp-4);
+}
+
+.menu {
+  width: 100%;
+  max-width: 620px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+  padding: var(--sp-5) 0;
+}
+
+.menu__head { display: flex; flex-direction: column; gap: var(--sp-5); }
+
+.logo { display: flex; align-items: center; gap: var(--sp-3); }
+.logo__mark { color: var(--accent); display: flex; }
+.logo__text { display: flex; flex-direction: column; }
+.logo__name {
+  font-size: var(--fs-2xl);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+.logo__sub {
+  font-size: var(--fs-xs);
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-top: 4px;
+}
+
+.tabs {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-md);
+  background: var(--bg-2);
+}
+.tabs button {
+  flex: 1;
+  padding: 9px 8px;
+  border: none;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--text-3);
+  font-size: var(--fs-sm);
+  font-weight: 550;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+}
+.tabs button:hover { color: var(--text-2); }
+.tabs button.is-active { background: var(--surface-2); color: var(--text); }
+
+.panel { display: flex; flex-direction: column; gap: var(--sp-5); }
+
+.field--name { max-width: 320px; }
+
+/* ── Tarjetas de modo ── */
+.modes { display: flex; flex-direction: column; gap: var(--sp-2); }
+
+.mode-card {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-md);
+  background: var(--bg-2);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+.mode-card:hover { border-color: var(--text-3); background: var(--surface); }
+.mode-card.is-active {
+  border-color: var(--accent);
+  background: var(--surface);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.mode-card__icon {
+  flex: none;
+  width: 34px; height: 34px;
+  display: grid; place-items: center;
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  color: var(--accent);
+  font-size: var(--fs-lg);
+}
+.mode-card.is-active .mode-card__icon { background: var(--accent); color: var(--accent-ink); }
+
+.mode-card__body { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.mode-card__name { font-weight: 600; font-size: var(--fs-md); }
+.mode-card__desc { font-size: var(--fs-sm); color: var(--text-2); }
+
+.mode-card__objectives {
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+}
+.mode-card__objectives li::before { content: '○ '; }
+
+.mode-card__time {
+  flex: none;
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+  padding-top: 3px;
+}
+
+/* ── Editor ── */
+.editor { display: flex; flex-direction: column; gap: var(--sp-4); }
+
+.editor__preview {
+  position: relative;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  aspect-ratio: 16 / 7;
+}
+.editor__preview canvas { display: block; width: 100%; height: 100%; }
+.editor__dice { position: absolute; top: 10px; right: 10px; padding: 6px 12px; font-size: var(--fs-sm); }
+
+.editor__warn {
+  padding: 10px 14px;
+  border-left: 3px solid var(--warn);
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+  background: var(--bg-2);
+  font-size: var(--fs-sm);
+  color: var(--text-2);
+}
+
+.editor__row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3); }
+
+/* ── Ajustes ── */
+.settings { display: flex; flex-direction: column; gap: var(--sp-6); }
+.settings__group { display: flex; flex-direction: column; gap: var(--sp-3); }
+
+.settings__title {
+  font-size: var(--fs-xs);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line-soft);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.theme-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--sp-2); }
+
+.theme-opt {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-md);
+  background: var(--bg-2);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .15s;
+}
+.theme-opt:hover { border-color: var(--text-3); }
+.theme-opt.is-active { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+
+.theme-opt__swatches { display: flex; height: 26px; border-radius: var(--r-sm); overflow: hidden; }
+.theme-opt__swatches span { flex: 1; }
+.theme-opt__name { font-size: var(--fs-sm); font-weight: 600; }
+.theme-opt__tag { font-size: var(--fs-xs); color: var(--text-3); }
+
+/* ── Logros ── */
+.achievements { display: flex; flex-direction: column; gap: 1px; }
+.achievements li {
+  display: flex;
+  gap: 10px;
+  padding: 9px 2px;
+  border-bottom: 1px solid var(--line-soft);
+  font-size: var(--fs-sm);
+  color: var(--text-3);
+}
+.achievements li.is-done { color: var(--text-2); }
+.achievements li.is-done .achievements__mark { color: var(--ok); }
+.achievements__mark { flex: none; width: 16px; text-align: center; }
+.achievements li b { display: block; color: inherit; font-weight: 600; }
+.achievements li.is-done b { color: var(--text); }
+.achievements li small { font-size: var(--fs-xs); color: var(--text-3); }
+
+/* ═══════════ PARTIDA ═══════════ */
+
+.screen--game { background: var(--bg); }
+
+.game-canvas {
+  display: block;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.hud {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  font-size: calc(var(--fs-md) * var(--hud-scale));
+  padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right))
+           max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+}
+.hud button, .hud .card { pointer-events: auto; }
+
+.hud__top { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--sp-3); }
+.hud__stats { display: flex; gap: var(--sp-2); flex-wrap: wrap; align-items: center; }
+
+/* Estado personal, abajo a la izquierda. Es lo que miras de reojo mil veces por
+   partida, así que va grande y sin adornos. */
+.hud__own {
+  position: absolute;
+  left: max(16px, env(safe-area-inset-left));
+  bottom: max(14px, env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  text-shadow: 0 1px 3px rgba(0,0,0,.75);
+}
+.own__length {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  line-height: 1.1;
+}
+.own__label {
+  font-size: calc(var(--fs-sm) * var(--hud-scale));
+  color: var(--text-2);
+}
+.own__length b {
+  font-size: calc(var(--fs-2xl) * var(--hud-scale));
+  font-weight: 750;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.own__rank {
+  font-size: calc(var(--fs-sm) * var(--hud-scale));
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+.own__rank b { color: var(--text-2); }
+.own__kills { color: var(--accent); }
+
+.stat-chip {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 7px 13px;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-md);
+  background: color-mix(in srgb, var(--bg) 72%, transparent);
+  backdrop-filter: blur(10px);
+  min-width: 74px;
+}
+.stat-chip__label {
+  font-size: calc(var(--fs-xs) * var(--hud-scale));
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.stat-chip__value {
+  font-size: calc(var(--fs-xl) * var(--hud-scale));
+  font-weight: 650;
+  line-height: 1.1;
+}
+.stat-chip--dim .stat-chip__value { font-size: calc(var(--fs-lg) * var(--hud-scale)); color: var(--text-2); }
+.stat-chip.is-alert { border-color: var(--danger); }
+.stat-chip.is-alert .stat-chip__value { color: var(--danger); }
+
+.fps { font-size: var(--fs-xs); color: var(--text-3); padding: 4px 8px; }
+
+/* ── Ranking, arriba a la derecha ── */
+.hud__leaderboard {
+  position: absolute;
+  top: max(14px, env(safe-area-inset-top)); right: max(14px, env(safe-area-inset-right));
+  width: 196px;
+}
+
+/* Sin panel ni marco: texto suelto sobre el juego con sombra dura. Un recuadro
+   opaco en esa esquina tapa demasiado campo de visión. */
+.leaderboard__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  text-shadow: 0 1px 3px rgba(0,0,0,.8);
+}
+
+.leaderboard__row {
+  display: grid;
+  grid-template-columns: 18px 8px 1fr auto;
+  align-items: center;
+  gap: 7px;
+  padding: 1px 0;
+  font-size: calc(var(--fs-sm) * var(--hud-scale));
+  color: var(--text-2);
+}
+.leaderboard__row.is-player { color: var(--accent); font-weight: 700; }
+.leaderboard__rank { color: var(--text-3); font-size: var(--fs-xs); text-align: right; }
+.leaderboard__dot { width: 7px; height: 7px; border-radius: 50%; }
+.leaderboard__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.leaderboard__value { font-variant-numeric: tabular-nums; }
+
+.killfeed {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+  text-align: right;
+}
+.killfeed b { color: var(--text-2); }
+.killfeed .is-player b { color: var(--accent); }
+.feed-enter-active, .feed-leave-active { transition: opacity .3s, transform .3s; }
+.feed-enter-from, .feed-leave-to { opacity: 0; transform: translateX(12px); }
+
+/* ── Equipos (Dominio) ── */
+.teams {
+  position: absolute;
+  top: 66px; left: max(12px, env(safe-area-inset-left));
+  width: 250px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 10px 12px;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-md);
+  background: color-mix(in srgb, var(--bg) 72%, transparent);
+  backdrop-filter: blur(10px);
+}
+.teams__row {
+  display: grid;
+  grid-template-columns: 12px 56px 1fr 38px 28px;
+  align-items: center;
+  gap: 7px;
+  font-size: var(--fs-xs);
+  color: var(--text-2);
+}
+.teams__row.is-mine { color: var(--text); font-weight: 650; }
+.teams__shape { width: 10px; height: 10px; }
+.teams__shape[data-shape='circle'] { border-radius: 50%; }
+.teams__shape[data-shape='triangle'] { clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+.teams__shape[data-shape='diamond'] { clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); }
+.teams__bar { height: 4px; border-radius: 2px; background: var(--line); overflow: hidden; }
+.teams__bar i { display: block; height: 100%; border-radius: 2px; transition: width .3s ease; }
+.teams__score { text-align: right; font-variant-numeric: tabular-nums; }
+.teams__nodes { text-align: right; color: var(--text-3); }
+.teams__hint { margin-top: 4px; font-size: 10px; color: var(--text-3); }
+
+/* ── Racha (Frenesí) ── */
+.streak {
+  position: absolute;
+  top: 76px; left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+.streak__mult {
+  font-size: calc(var(--fs-2xl) * var(--hud-scale));
+  font-weight: 750;
+  color: var(--warn);
+  line-height: 1;
+  text-shadow: 0 2px 12px color-mix(in srgb, var(--warn) 50%, transparent);
+}
+.streak__bar { width: 88px; height: 3px; border-radius: 2px; background: var(--line); overflow: hidden; }
+.streak__bar i { display: block; height: 100%; background: var(--warn); }
+
+/* ── Objetivos diarios ── */
+.objectives {
+  position: absolute;
+  top: 66px; left: max(12px, env(safe-area-inset-left));
+  width: 232px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-md);
+  background: color-mix(in srgb, var(--bg) 72%, transparent);
+  backdrop-filter: blur(10px);
+  font-size: var(--fs-xs);
+  color: var(--text-2);
+}
+.objectives li { display: grid; grid-template-columns: 14px 1fr; gap: 6px; align-items: center; }
+.objectives li.is-done { color: var(--ok); }
+.objectives__mark { text-align: center; }
+.objectives__bar {
+  grid-column: 2;
+  height: 3px; border-radius: 2px; background: var(--line); overflow: hidden;
+}
+.objectives__bar i { display: block; height: 100%; background: var(--accent); transition: width .3s; }
+.objectives li.is-done .objectives__bar i { background: var(--ok); }
+
+/* ── Banner de fase / jefe ── */
+.banner {
+  position: absolute;
+  top: 14px; left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: var(--sp-3);
+  padding: 6px 16px;
+  border-radius: var(--r-full);
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  border: 1px solid var(--line-soft);
+  backdrop-filter: blur(10px);
+  font-size: var(--fs-xs);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--text-2);
+}
+.banner__boss { color: var(--danger); font-weight: 700; }
+
+/* ── Potenciadores ── */
+.powers {
+  position: absolute;
+  bottom: max(14px, env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: var(--sp-2);
+}
+.powers li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-full);
+  background: color-mix(in srgb, var(--bg) 78%, transparent);
+  backdrop-filter: blur(10px);
+  font-size: var(--fs-xs);
+}
+.powers__icon { color: var(--accent-2); font-size: var(--fs-md); }
+.powers__time { color: var(--text-3); font-variant-numeric: tabular-nums; }
+
+.spectating {
+  position: absolute;
+  bottom: 24px; left: 50%;
+  transform: translateX(-50%);
+  font-size: var(--fs-sm);
+  color: var(--text-2);
+}
+
+/* ── Cartas (Nido) ── */
+.cards {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-5);
+  background: color-mix(in srgb, var(--bg) 86%, transparent);
+  backdrop-filter: blur(8px);
+  pointer-events: auto;
+  padding: var(--sp-4);
+}
+.cards__title { font-size: var(--fs-xl); }
+.cards__row { display: flex; gap: var(--sp-3); flex-wrap: wrap; justify-content: center; }
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 210px;
+  padding: 20px 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .15s, transform .15s, background .15s;
+}
+.card:hover { border-color: var(--accent); background: var(--surface-2); transform: translateY(-3px); }
+.card__name { font-size: var(--fs-lg); font-weight: 650; color: var(--accent); }
+.card__desc { font-size: var(--fs-sm); color: var(--text-2); }
+
+.cards__taken {
+  display: flex; gap: 6px; flex-wrap: wrap; justify-content: center;
+  font-size: var(--fs-xs); color: var(--text-3);
+}
+.cards__taken li {
+  padding: 3px 10px;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-full);
+}
+
+/* ═══════════ PAUSA ═══════════ */
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: var(--sp-4);
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  backdrop-filter: blur(10px);
+}
+
+.overlay__box {
+  width: 100%;
+  max-width: 320px;
+  max-height: 88vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  padding: var(--sp-6) var(--sp-5);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--bg-2);
+  box-shadow: var(--shadow-lg);
+}
+.overlay__box.is-wide { max-width: 520px; }
+
+.overlay__eyebrow {
+  font-size: var(--fs-xs);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.overlay__title { font-size: var(--fs-2xl); }
+.overlay__actions, .overlay__settings { display: flex; flex-direction: column; gap: var(--sp-2); }
+.overlay__settings { gap: var(--sp-5); }
+
+/* ═══════════ FIN DE PARTIDA ═══════════ */
+
+.screen--over {
+  display: grid;
+  place-items: center;
+  overflow-y: auto;
+  padding: var(--sp-5) var(--sp-4);
+  background:
+    radial-gradient(120% 80% at 50% 0%, var(--surface) 0%, transparent 62%),
+    var(--bg);
+}
+
+.over {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  text-align: center;
+}
+
+.over__eyebrow {
+  font-size: var(--fs-xs);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.over__title { font-size: var(--fs-3xl); letter-spacing: -0.02em; }
+.over__title.is-win { color: var(--accent); }
+.over__cause { color: var(--text-2); font-size: var(--fs-sm); }
+.over__extra { font-size: var(--fs-sm); color: var(--text-3); }
+
+.over__stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(104px, 1fr));
+  gap: var(--sp-2);
+  margin-top: var(--sp-2);
+}
+.over__stats .stat { align-items: center; text-align: center; }
+
+.over__objectives {
+  display: flex; flex-direction: column; gap: 4px;
+  padding: var(--sp-3);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-md);
+  background: var(--bg-2);
+  font-size: var(--fs-sm);
+  color: var(--text-3);
+  text-align: left;
+}
+.over__objectives li { display: flex; gap: 8px; align-items: baseline; }
+.over__objectives li.is-done { color: var(--ok); }
+.over__objectives b { margin-left: auto; font-variant-numeric: tabular-nums; }
+
+.over__records, .over__unlocks {
+  padding: var(--sp-3);
+  border: 1px solid var(--line-soft);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 var(--r-md) var(--r-md) 0;
+  background: var(--bg-2);
+  text-align: left;
+}
+.over__records-title {
+  font-size: var(--fs-xs);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 5px;
+}
+.over__records li, .over__unlocks li { font-size: var(--fs-sm); color: var(--text-2); }
+.over__records b { color: var(--text); }
+
+.over__actions { display: flex; flex-direction: column; gap: var(--sp-2); margin-top: var(--sp-2); }
+
+/* ═══════════ MÓVIL ═══════════ */
+
+@media (max-width: 720px) {
+  .hud__leaderboard { width: 132px; }
+  .killfeed { display: none; }
+  .teams { width: 186px; top: 62px; }
+  .objectives { display: none; }
+  .stat-chip { min-width: 62px; padding: 6px 10px; }
+  .own__length b { font-size: calc(var(--fs-xl) * var(--hud-scale)); }
+  .powers { bottom: 78px; }
+  .card { width: 100%; max-width: 300px; padding: 16px; }
+  .cards__row { flex-direction: column; width: 100%; align-items: center; }
+  .editor__row { grid-template-columns: 1fr; }
+  .game-canvas { cursor: none; }
+}
+
+@media (max-width: 420px) {
+  .tabs button { font-size: var(--fs-xs); padding: 8px 4px; }
+  .hud__leaderboard { width: 124px; }
+  .mode-card__time { display: none; }
+}

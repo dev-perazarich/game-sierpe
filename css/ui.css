@@ -1,0 +1,202 @@
+/* ═══════════════════════════════════════════════════════════
+   ui.css — Componentes reutilizables: botones, campos, chips, tarjetas.
+═══════════════════════════════════════════════════════════ */
+
+/* ── Botones ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  padding: 10px 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  color: var(--text);
+  font-size: var(--fs-md);
+  font-weight: 550;
+  cursor: pointer;
+  transition: background .15s ease, border-color .15s ease, transform .1s ease;
+}
+.btn:hover { background: var(--surface-2); border-color: var(--text-3); }
+.btn:active { transform: translateY(1px); }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+
+.btn--primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 650;
+}
+.btn--primary:hover { background: var(--accent-2); border-color: var(--accent-2); }
+
+.btn--ghost { background: transparent; border-color: transparent; color: var(--text-2); }
+.btn--ghost:hover { background: var(--surface); color: var(--text); }
+
+.btn--big { padding: 15px 28px; font-size: var(--fs-lg); width: 100%; }
+
+.btn--icon {
+  width: 38px; height: 38px;
+  padding: 0;
+  font-size: var(--fs-sm);
+  letter-spacing: 1px;
+}
+
+/* ── Campos ── */
+.field { display: flex; flex-direction: column; gap: 6px; }
+
+.field__label {
+  font-size: var(--fs-xs);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  font-weight: 600;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.field__label b { color: var(--text-2); font-variant-numeric: tabular-nums; }
+
+.field__hint {
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 400;
+}
+
+.input, select {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--bg-2);
+  color: var(--text);
+  font: inherit;
+  transition: border-color .15s ease, background .15s ease;
+}
+.input:focus, select:focus { border-color: var(--accent); background: var(--surface); outline: none; }
+.input::placeholder { color: var(--text-3); }
+
+input[type='color'] {
+  width: 100%;
+  height: 44px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--bg-2);
+  cursor: pointer;
+}
+
+input[type='range'] {
+  width: 100%;
+  height: 22px;
+  background: transparent;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+input[type='range']::-webkit-slider-runnable-track {
+  height: 4px; border-radius: 2px; background: var(--line);
+}
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px; height: 16px; margin-top: -6px;
+  border-radius: 50%; background: var(--accent);
+  border: 2px solid var(--bg);
+}
+input[type='range']::-moz-range-track { height: 4px; border-radius: 2px; background: var(--line); }
+input[type='range']::-moz-range-thumb {
+  width: 14px; height: 14px; border: 2px solid var(--bg);
+  border-radius: 50%; background: var(--accent);
+}
+
+.switch {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 7px 0;
+  cursor: pointer;
+  font-size: var(--fs-sm);
+  color: var(--text-2);
+}
+.switch input { margin-top: 3px; accent-color: var(--accent); width: 16px; height: 16px; }
+.switch span { flex: 1; }
+
+/* ── Chips ── */
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-full);
+  background: var(--bg-2);
+  color: var(--text-2);
+  font-size: var(--fs-sm);
+  cursor: pointer;
+  transition: background .15s, border-color .15s, color .15s;
+}
+.chip:hover:not(:disabled) { border-color: var(--text-3); color: var(--text); }
+.chip.is-active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 600;
+}
+.chip.is-locked { opacity: .42; cursor: not-allowed; }
+.chip__lock { font-size: 10px; }
+
+.badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: var(--r-full);
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  vertical-align: middle;
+}
+
+/* ── Tarjetas de estadística ── */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-5);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 14px;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-md);
+  background: var(--bg-2);
+}
+.stat__label {
+  font-size: var(--fs-xs);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.stat__value { font-size: var(--fs-xl); font-weight: 650; color: var(--text); line-height: 1.15; }
+
+/* ── Pistas ── */
+.hint {
+  font-size: var(--fs-sm);
+  color: var(--text-3);
+  text-align: center;
+  line-height: 1.9;
+}
+
+/* ── Scrollbar discreta ── */
+* { scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
+*::-webkit-scrollbar { width: 9px; height: 9px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background: var(--line); border-radius: 5px; }
+*::-webkit-scrollbar-thumb:hover { background: var(--text-3); }

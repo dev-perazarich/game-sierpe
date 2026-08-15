@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
+  <meta name="theme-color" content="#04101C" />
+  <meta name="description" content="Arcade de serpientes con cinco modos de juego, bots con personalidad y tres temas visuales." />
+  <title>Sierpe</title>
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'><circle cx='24' cy='24' r='22' fill='%2304101C'/><path d='M10 34c0-8 8-10 14-10s10-2 10-7-4-7-8-5' fill='none' stroke='%234fd6c8' stroke-width='6' stroke-linecap='round'/></svg>" />
+
+  <link rel="stylesheet" href="css/tokens.css" />
+  <link rel="stylesheet" href="css/ui.css" />
+  <link rel="stylesheet" href="css/screens.css" />
+</head>
+<body>
+  <!--
+    Deliberadamente vacío.
+
+    Si se deja marcado aquí dentro, Vue lo trata como "plantilla en el DOM" y
+    manda el parser de HTML, no Vue: <MenuScreen> se convierte en <menuscreen>
+    (que Vue ya no resuelve) y el autocierre /> no existe para elementos no-void,
+    así que un componente se traga el resto del documento. Con la build de
+    producción, además, todo eso falla sin un solo aviso en consola.
+
+    La plantilla raíz vive en src/main.js como cadena, igual que la del resto de
+    componentes. Allí no rigen las reglas del parser de HTML.
+  -->
+  <div id="app"></div>
+
+  <noscript>
+    <p style="padding:2rem;font-family:system-ui,sans-serif;color:#e3eae7;background:#04101C">
+      Este juego necesita JavaScript activado.
+    </p>
+  </noscript>
+
+  <!--
+    Vue 3 desde CDN, build "global" porque incluye el compilador de plantillas:
+    los componentes definen su template como cadena dentro de módulos ES, sin
+    paso de build. Se carga antes que main.js para que `Vue` exista al importar.
+
+    Se usa la build de desarrollo, NO vue.global.prod.js: la de producción
+    elimina todos los avisos, y sin paso de build esos avisos son la única
+    señal cuando algo va mal. Para publicar, cambia a vue.global.prod.js.
+  -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>

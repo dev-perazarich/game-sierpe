@@ -1,0 +1,204 @@
+/* ═══════════════════════════════════════════════════════════
+   tokens.css — Sistema de diseño de la interfaz.
+
+   Frente al CSS anterior: fuera Tailwind por CDN (300 KB de compilador para
+   cinco clases) y fuera Orbitron, que es la fuente por defecto de todo juego de
+   navegador. Se usa una pila de sistema, así que no hay petición de fuente que
+   falle ni salto de maquetación al cargar.
+
+   Los tokens de color cambian con el tema activo mediante [data-theme], pero la
+   interfaz mantiene un lenguaje propio: el juego es oscuro y saturado, la UI es
+   sobria para no competir con él.
+═══════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Tipografía ── */
+  --f-ui: 'Segoe UI Variable Text', 'Segoe UI', -apple-system, BlinkMacSystemFont,
+          system-ui, 'Helvetica Neue', sans-serif;
+  --f-num: 'Segoe UI Variable Display', 'Segoe UI', system-ui, sans-serif;
+  --f-mono: 'Cascadia Mono', Consolas, 'JetBrains Mono', ui-monospace, monospace;
+
+  --fs-xs: 0.6875rem;
+  --fs-sm: 0.8125rem;
+  --fs-md: 0.9375rem;
+  --fs-lg: 1.125rem;
+  --fs-xl: 1.5rem;
+  --fs-2xl: 2rem;
+  --fs-3xl: clamp(2.2rem, 6vw, 3.4rem);
+
+  /* ── Espaciado ── */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 16px;
+  --r-full: 999px;
+
+  /* ── Color base (tema Abismo, el de arranque) ── */
+  --bg:        #04101C;
+  --bg-2:      #08192A;
+  --surface:   #0C2136;
+  --surface-2: #113049;
+  --line:      #1B3B55;
+  --line-soft: #12293C;
+
+  --text:      #E4F2F5;
+  --text-2:    #93B2BF;
+  --text-3:    #5E7C8B;
+
+  --accent:    #4FD6C8;
+  --accent-2:  #9FF0DD;
+  --accent-ink:#032420;
+  --danger:    #FF5B6E;
+  --warn:      #E8B44A;
+  --ok:        #5AD48C;
+
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.32);
+  --shadow-md: 0 4px 20px -6px rgba(0,0,0,.55);
+  --shadow-lg: 0 24px 64px -20px rgba(0,0,0,.75);
+
+  --hud-scale: 1;
+
+  color-scheme: dark;
+}
+
+/* Tema Panal — el de arranque. Neutro y de alto contraste, para que el color
+   lo pongan las serpientes y la comida, no la interfaz. */
+[data-theme='panal'] {
+  --bg:        #14161F;
+  --bg-2:      #1B1E29;
+  --surface:   #242833;
+  --surface-2: #2F3441;
+  --line:      #3B4150;
+  --line-soft: #282C38;
+
+  --text:      #F1F4F9;
+  --text-2:    #A8B2C4;
+  --text-3:    #6E7789;
+
+  --accent:    #FF7A45;
+  --accent-2:  #FFA173;
+  --accent-ink:#1A0B04;
+  --danger:    #FF3B4E;
+  --warn:      #FFC14D;
+  --ok:        #4FC3F7;
+}
+
+/* Tema Circuito */
+[data-theme='neon'] {
+  --bg:        #0B0410;
+  --bg-2:      #150720;
+  --surface:   #1D0A2C;
+  --surface-2: #2A0F3F;
+  --line:      #3D1657;
+  --line-soft: #260F39;
+
+  --text:      #F2E6FF;
+  --text-2:    #B392CE;
+  --text-3:    #7B5B95;
+
+  --accent:    #FF2D95;
+  --accent-2:  #00E5FF;
+  --accent-ink:#1A0010;
+  --danger:    #FF2D55;
+  --warn:      #FFE45C;
+  --ok:        #00E5FF;
+}
+
+/* Tema Pradera */
+[data-theme='cartoon'] {
+  --bg:        #22392E;
+  --bg-2:      #2A4739;
+  --surface:   #335545;
+  --surface-2: #3F6653;
+  --line:      #4C7A62;
+  --line-soft: #3A5D4B;
+
+  --text:      #FDF6E3;
+  --text-2:    #C4D9BC;
+  --text-3:    #92AE8B;
+
+  --accent:    #F5D547;
+  --accent-2:  #A8D98E;
+  --accent-ink:#1E3025;
+  --danger:    #EE6C4D;
+  --warn:      #F5D547;
+  --ok:        #77B255;
+}
+
+/* Alto contraste: apaga los fondos suaves y sube las líneas. */
+[data-contrast='high'] {
+  --bg:        #000000;
+  --bg-2:      #000000;
+  --surface:   #0A0A0A;
+  --surface-2: #141414;
+  --line:      #4A4A4A;
+  --line-soft: #2E2E2E;
+  --text:      #FFFFFF;
+  --text-2:    #D6D6D6;
+  --text-3:    #A0A0A0;
+}
+
+/* ── Reset ── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--f-ui);
+  font-size: var(--fs-md);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#app { width: 100%; height: 100%; position: relative; }
+
+h1, h2, h3, h4 { margin: 0; font-weight: 650; line-height: 1.2; text-wrap: balance; }
+p { margin: 0; }
+ul, ol { margin: 0; padding: 0; list-style: none; }
+button { font: inherit; color: inherit; }
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
+
+kbd {
+  font-family: var(--f-mono);
+  font-size: 0.85em;
+  padding: 1px 5px;
+  border: 1px solid var(--line);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--text-2);
+}
+
+/* Todo lo que sean cifras alineadas usa cifras tabulares: si no, el marcador
+   baila cada vez que cambia un dígito. */
+.tabular, .stat__value, .stat-chip__value, .leaderboard__value,
+.teams__score, .fps { font-variant-numeric: tabular-nums; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
