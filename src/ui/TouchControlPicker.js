@@ -12,7 +12,7 @@
 
 import { drawControlPreview } from '../render/touchControls.js';
 
-const { ref, onMounted, watch, nextTick } = Vue;
+const { ref, onMounted, onBeforeUnmount, watch, nextTick } = Vue;
 
 export const MODOS_TACTILES = [
   {
@@ -41,18 +41,21 @@ export const TouchControlPicker = {
 
   setup(props) {
     const canvases = ref([]);
+    let observer = null;
 
     function render() {
       for (const [i, modo] of MODOS_TACTILES.entries()) {
         const c = canvases.value[i];
         if (!c) continue;
-        const dpr = Math.min(window.devicePixelRatio || 1, 2);
         const w = c.clientWidth, h = c.clientHeight;
+        // Mientras la pestaña esté oculta el canvas mide 0. No se dibuja, pero
+        // el observador de abajo lo reintentará en cuanto tenga tamaño.
         if (!w || !h) continue;
-        if (c.width !== Math.round(w * dpr)) {
-          c.width = Math.round(w * dpr);
-          c.height = Math.round(h * dpr);
-        }
+
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const bw = Math.round(w * dpr), bh = Math.round(h * dpr);
+        if (c.width !== bw || c.height !== bh) { c.width = bw; c.height = bh; }
+
         const ctx = c.getContext('2d');
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
         ctx.clearRect(0, 0, w, h);
@@ -62,9 +65,24 @@ export const TouchControlPicker = {
       }
     }
 
-    onMounted(() => nextTick(render));
+    onMounted(() => {
+      nextTick(render);
+      // El panel de ajustes vive dentro de un v-show, así que al montarse tiene
+      // display:none y tamaño cero. Un ResizeObserver es lo único que se entera
+      // de cuándo pasa a ser visible; sin él los canvas se quedaban en blanco.
+      if (typeof ResizeObserver !== 'undefined') {
+        observer = new ResizeObserver(() => render());
+        for (const c of canvases.value) if (c) observer.observe(c);
+      }
+      window.addEventListener('resize', render);
+    });
+
+    onBeforeUnmount(() => {
+      observer?.disconnect();
+      window.removeEventListener('resize', render);
+    });
+
     watch(() => props.theme.id, () => nextTick(render));
-    window.addEventListener('resize', render);
 
     return { modos: MODOS_TACTILES, canvases, render };
   },
@@ -77,8 +95,10 @@ export const TouchControlPicker = {
         @click="$emit('update:modelValue', m.id)"
       >
         <canvas :ref="el => { if (el) canvases[i] = el }" aria-hidden="true"></canvas>
-        <span class="ctrl-opt__name">{{ m.label }}</span>
-        <span class="ctrl-opt__desc">{{ m.desc }}</span>
+        <span class="ctrl-opt__text">
+          <span class="ctrl-opt__name">{{ m.label }}</span>
+          <span class="ctrl-opt__desc">{{ m.desc }}</span>
+        </span>
       </button>
     </div>
   `,

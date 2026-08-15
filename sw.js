@@ -79,7 +79,7 @@ const PRECACHE = [
   'src/ui/HudOverlay.js',
   'src/ui/Leaderboard.js',
   'src/ui/MenuScreen.js',
-  'src/ui/ModePicker.js',
+  'src/ui/ModeDialog.js',
   'src/ui/PauseOverlay.js',
   'src/ui/SettingsPanel.js',
   'src/ui/SnakeEditor.js',

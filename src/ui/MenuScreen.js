@@ -1,59 +1,77 @@
-/**
- * MenuScreen.js — Pantalla principal.
- *
- * Frente al menú anterior: el nombre ya no es obligatorio (se genera uno
- * editable), el botón de jugar nunca está deshabilitado, y lo primero que ves es
- * a qué puedes jugar en lugar de un bloque de instrucciones.
+/*
+ * Sierpe — pantalla de inicio.
+ * Copyright (C) 2026 dev-perazarich · GNU AGPL v3.0
  */
 
-import { ModePicker } from './ModePicker.js';
+/**
+ * MenuScreen.js — Lo primero que se ve.
+ *
+ * Principio de diseño: el arranque pide lo mínimo para empezar a jugar —un
+ * nombre y un botón— y nada más. Todo lo demás (elegir modo, dificultad,
+ * apariencia, ajustes, estadísticas) está a un toque de distancia pero no
+ * ocupa la primera pantalla.
+ *
+ * La versión anterior mostraba de golpe las seis tarjetas de modo, cuatro
+ * pestañas y el campo de nombre. En un móvil eso obligaba a desplazarse antes
+ * de poder jugar.
+ */
+
+import { ModeDialog } from './ModeDialog.js';
 import { SnakeEditor } from './SnakeEditor.js';
 import { SettingsPanel } from './SettingsPanel.js';
 import { progressList } from '../meta/achievements.js';
+import { getMode } from '../modes/index.js';
 
 const { ref, computed } = Vue;
 
 export const MenuScreen = {
-  components: { ModePicker, SnakeEditor, SettingsPanel },
+  components: { ModeDialog, SnakeEditor, SettingsPanel },
   props: {
     profile: { type: Object, required: true },
     theme: { type: Object, required: true },
     fps: { type: Number, default: 0 },
+    offlineReady: { type: Boolean, default: false },
+    canInstall: { type: Boolean, default: false },
   },
-  emits: ['play', 'setting', 'appearance', 'name', 'mode'],
+  emits: ['play', 'setting', 'appearance', 'name', 'mode', 'install'],
 
   setup(props, { emit }) {
-    const tab = ref('jugar');
+    // 'inicio' es la pantalla desnuda; el resto son paneles a los que se entra
+    // y de los que se vuelve.
+    const panel = ref('inicio');
+    const dialogOpen = ref(false);
     const mode = ref(props.profile.lastMode);
 
     const achievements = computed(() => progressList(props.profile));
     const done = computed(() => achievements.value.filter((a) => a.done).length);
     const stats = computed(() => props.profile.summary());
+    const modeName = computed(() => getMode(mode.value).name);
 
-    function play() {
-      emit('mode', mode.value);
-      emit('play', mode.value);
+    function start(id) {
+      dialogOpen.value = false;
+      emit('mode', id);
+      emit('play', id);
     }
 
-    function onName(e) {
-      emit('name', e.target.value);
-    }
-
-    return { tab, mode, achievements, done, stats, play, onName };
+    return {
+      panel, dialogOpen, mode, modeName,
+      achievements, done, stats, start,
+    };
   },
 
   template: `
     <div class="screen screen--menu">
-      <div class="menu">
+      <div class="menu" :class="{ 'is-home': panel === 'inicio' }">
 
-        <header class="menu__head">
+        <!-- ══ INICIO ══ -->
+        <template v-if="panel === 'inicio'">
           <h1 class="logo">
             <span class="logo__mark" aria-hidden="true">
-              <svg viewBox="0 0 48 48" width="44" height="44">
-                <path d="M6 34c0-8 8-10 14-10s12-2 12-8-5-8-9-6"
-                      fill="none" stroke="currentColor" stroke-width="6"
+              <svg viewBox="0 0 48 48" width="52" height="52">
+                <path d="M9 37c0-9 9-11 15-11s11-2 11-8-5-8-9-6"
+                      fill="none" stroke="currentColor" stroke-width="7"
                       stroke-linecap="round" stroke-linejoin="round" />
-                <circle cx="35" cy="9" r="2.6" fill="currentColor" />
+                <circle cx="36" cy="10" r="2.8" fill="currentColor" />
               </svg>
             </span>
             <span class="logo__text">
@@ -62,89 +80,114 @@ export const MenuScreen = {
             </span>
           </h1>
 
-          <nav class="tabs" role="tablist">
-            <button type="button" role="tab" :aria-selected="tab === 'jugar'"
-                    :class="{ 'is-active': tab === 'jugar' }" @click="tab = 'jugar'">Jugar</button>
-            <button type="button" role="tab" :aria-selected="tab === 'serpiente'"
-                    :class="{ 'is-active': tab === 'serpiente' }" @click="tab = 'serpiente'">Serpiente</button>
-            <button type="button" role="tab" :aria-selected="tab === 'ajustes'"
-                    :class="{ 'is-active': tab === 'ajustes' }" @click="tab = 'ajustes'">Ajustes</button>
-            <button type="button" role="tab" :aria-selected="tab === 'perfil'"
-                    :class="{ 'is-active': tab === 'perfil' }" @click="tab = 'perfil'">Perfil</button>
-          </nav>
-        </header>
-
-        <div class="menu__body">
-
-          <!-- JUGAR -->
-          <div v-show="tab === 'jugar'" class="panel">
-            <label class="field field--name">
+          <div class="home">
+            <label class="field">
               <span class="field__label">Tu nombre</span>
               <input
-                type="text" maxlength="18" class="input"
+                type="text" maxlength="18" class="input input--big"
                 :value="profile.appearance.name"
                 placeholder="Escribe un nombre"
-                @input="onName"
-                @keyup.enter="play"
+                @input="$emit('name', $event.target.value)"
+                @keyup.enter="dialogOpen = true"
               />
             </label>
 
-            <ModePicker v-model="mode" @play="play" />
-
-            <button class="btn btn--primary btn--big" type="button" @click="play">
+            <button class="btn btn--primary btn--play" type="button" @click="dialogOpen = true">
               Jugar
             </button>
 
-            <p class="hint">
-              Mueve con el ratón o <kbd>WASD</kbd> · acelera con <kbd>clic</kbd> o <kbd>espacio</kbd>
-              · pausa con <kbd>Esc</kbd>
+            <p class="home__last">
+              Último modo: <b>{{ modeName }}</b>
             </p>
           </div>
 
-          <!-- SERPIENTE -->
-          <div v-show="tab === 'serpiente'" class="panel">
+          <nav class="home__nav">
+            <button type="button" @click="panel = 'serpiente'">
+              <span aria-hidden="true">◕</span> Serpiente
+            </button>
+            <button type="button" @click="panel = 'ajustes'">
+              <span aria-hidden="true">⚙</span> Ajustes
+            </button>
+            <button type="button" @click="panel = 'perfil'">
+              <span aria-hidden="true">▤</span> Perfil
+            </button>
+          </nav>
+
+          <footer class="home__foot">
+            <p class="home__offline" :class="{ 'is-ready': offlineReady }">
+              <span aria-hidden="true">{{ offlineReady ? '●' : '○' }}</span>
+              {{ offlineReady
+                 ? 'Listo para jugar sin conexión'
+                 : 'Preparando el modo sin conexión…' }}
+            </p>
+            <button
+              v-if="canInstall"
+              class="btn btn--ghost btn--install" type="button"
+              @click="$emit('install')"
+            >Instalar aplicación</button>
+          </footer>
+        </template>
+
+        <!-- ══ PANELES ══ -->
+        <template v-else>
+          <header class="panel__head">
+            <button class="btn btn--icon" type="button" @click="panel = 'inicio'" aria-label="Volver">←</button>
+            <h2 class="panel__title">
+              {{ panel === 'serpiente' ? 'Tu serpiente'
+               : panel === 'ajustes'   ? 'Ajustes' : 'Perfil' }}
+            </h2>
+          </header>
+
+          <div class="panel">
             <SnakeEditor
+              v-if="panel === 'serpiente'"
               :appearance="profile.appearance"
               :theme="theme"
               :profile="profile"
               @change="$emit('appearance', $event)"
             />
-          </div>
 
-          <!-- AJUSTES -->
-          <div v-show="tab === 'ajustes'" class="panel">
             <SettingsPanel
+              v-else-if="panel === 'ajustes'"
               :settings="profile.settings"
               :fps="fps"
               @change="(k, v) => $emit('setting', k, v)"
             />
-          </div>
 
-          <!-- PERFIL -->
-          <div v-show="tab === 'perfil'" class="panel">
-            <div class="stat-grid">
-              <div v-for="s in stats" :key="s.label" class="stat">
-                <span class="stat__label">{{ s.label }}</span>
-                <span class="stat__value">{{ s.value }}</span>
+            <template v-else>
+              <div class="stat-grid">
+                <div v-for="s in stats" :key="s.label" class="stat">
+                  <span class="stat__label">{{ s.label }}</span>
+                  <span class="stat__value">{{ s.value }}</span>
+                </div>
               </div>
-            </div>
 
-            <h3 class="settings__title">
-              Logros <span class="field__hint">{{ done }} de {{ achievements.length }}</span>
-            </h3>
-            <ul class="achievements">
-              <li v-for="a in achievements" :key="a.id" :class="{ 'is-done': a.done }">
-                <span class="achievements__mark" aria-hidden="true">{{ a.done ? '✓' : '·' }}</span>
-                <span>
-                  <b>{{ a.name }}</b>
-                  <small>{{ a.desc }}</small>
-                </span>
-              </li>
-            </ul>
+              <h3 class="settings__title">
+                Logros <span class="field__hint">{{ done }} de {{ achievements.length }}</span>
+              </h3>
+              <ul class="achievements">
+                <li v-for="a in achievements" :key="a.id" :class="{ 'is-done': a.done }">
+                  <span class="achievements__mark" aria-hidden="true">{{ a.done ? '✓' : '·' }}</span>
+                  <span>
+                    <b>{{ a.name }}</b>
+                    <small>{{ a.desc }}</small>
+                  </span>
+                </li>
+              </ul>
+            </template>
           </div>
+        </template>
 
-        </div>
       </div>
+
+      <ModeDialog
+        v-if="dialogOpen"
+        v-model:mode-id="mode"
+        :difficulty="profile.settings.difficulty"
+        @update:difficulty="$emit('setting', 'difficulty', $event)"
+        @start="start"
+        @close="dialogOpen = false"
+      />
     </div>
   `,
 };

@@ -49,32 +49,105 @@
   margin-top: 4px;
 }
 
-.tabs {
+/* La pantalla de inicio se centra vertical y respira; los paneles internos
+   empiezan arriba porque su contenido es largo. */
+.menu.is-home {
+  min-height: min(100%, 640px);
+  justify-content: center;
+  gap: var(--sp-6);
+  max-width: 420px;
+}
+
+.home { display: flex; flex-direction: column; gap: var(--sp-4); }
+
+.input--big { padding: 14px 16px; font-size: var(--fs-lg); text-align: center; }
+
+.btn--play {
+  width: 100%;
+  padding: 20px;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  border-radius: var(--r-lg);
+}
+
+.home__last { text-align: center; font-size: var(--fs-sm); color: var(--text-3); }
+.home__last b { color: var(--text-2); font-weight: 600; }
+
+.home__nav { display: flex; gap: var(--sp-2); }
+.home__nav button {
+  flex: 1;
   display: flex;
-  gap: 2px;
-  padding: 3px;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 13px 6px;
   border: 1px solid var(--line-soft);
   border-radius: var(--r-md);
   background: var(--bg-2);
-}
-.tabs button {
-  flex: 1;
-  padding: 9px 8px;
-  border: none;
-  border-radius: var(--r-sm);
-  background: transparent;
-  color: var(--text-3);
-  font-size: var(--fs-sm);
-  font-weight: 550;
+  color: var(--text-2);
+  font-size: var(--fs-xs);
   cursor: pointer;
-  transition: background .15s, color .15s;
+  transition: border-color .15s, color .15s, background .15s;
 }
-.tabs button:hover { color: var(--text-2); }
-.tabs button.is-active { background: var(--surface-2); color: var(--text); }
+.home__nav button:hover { border-color: var(--text-3); color: var(--text); background: var(--surface); }
+.home__nav button span { font-size: 1.15rem; line-height: 1; color: var(--text-3); }
+.home__nav button:hover span { color: var(--accent); }
+
+.home__foot { display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); }
+.home__offline { font-size: var(--fs-xs); color: var(--text-3); }
+.home__offline span { color: var(--text-3); margin-right: 4px; }
+.home__offline.is-ready span { color: var(--ok); }
+.btn--install { font-size: var(--fs-sm); padding: 8px 16px; }
+
+/* Cabecera de los paneles internos */
+.panel__head { display: flex; align-items: center; gap: var(--sp-3); }
+.panel__title { font-size: var(--fs-xl); }
 
 .panel { display: flex; flex-direction: column; gap: var(--sp-5); }
 
-.field--name { max-width: 320px; }
+/* ── Diálogo de partida ── */
+.dialog {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 520px;
+  max-height: min(88vh, 760px);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--bg-2);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+.dialog:focus { outline: none; }
+
+.dialog__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding: var(--sp-4) var(--sp-5);
+  border-bottom: 1px solid var(--line-soft);
+}
+.dialog__title { font-size: var(--fs-lg); }
+
+/* Solo el cuerpo se desplaza: el botón de empezar queda siempre a la vista. */
+.dialog__body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--sp-4) var(--sp-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+  touch-action: pan-y;
+}
+
+.dialog__foot {
+  padding: var(--sp-4) var(--sp-5);
+  border-top: 1px solid var(--line-soft);
+  background: var(--bg-2);
+}
 
 /* ── Tarjetas de modo ── */
 .modes { display: flex; flex-direction: column; gap: var(--sp-2); }
@@ -660,10 +733,15 @@
 .ctrl-opt canvas {
   display: block;
   width: 100%;
-  aspect-ratio: 4 / 3;
+  height: 96px;              /* alto fijo: aspect-ratio dejaba el canvas sin
+                                dimensión resoluble dentro de un flex oculto */
   border-radius: var(--r-sm);
   background: var(--bg);
 }
+/* El texto va en su propio contenedor. Sin él, al pasar la tarjeta a fila en
+   móvil, nombre y descripción se convertían en columnas hermanas del canvas y
+   salían pegados en la misma línea. */
+.ctrl-opt__text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .ctrl-opt__name { font-size: var(--fs-sm); font-weight: 650; }
 .ctrl-opt__desc { font-size: var(--fs-xs); color: var(--text-3); line-height: 1.4; }
 
@@ -690,8 +768,15 @@
   /* Menú y pantalla final: en 400 px de alto hay que poder desplazar. */
   .screen--menu, .screen--over { align-items: start; padding: 12px; }
   .menu { gap: var(--sp-3); padding: 0; }
+  .menu.is-home { min-height: 0; gap: var(--sp-4); }
   .menu__head { gap: var(--sp-3); }
   .logo__name { font-size: var(--fs-xl); }
+  .logo__mark svg { width: 36px; height: 36px; }
+  .btn--play { padding: 14px; font-size: var(--fs-lg); }
+  .input--big { padding: 10px 14px; font-size: var(--fs-md); }
+  .home__nav button { padding: 9px 6px; }
+  .dialog { max-height: 94vh; }
+  .dialog__head, .dialog__body, .dialog__foot { padding: 10px 14px; }
   .over__title { font-size: var(--fs-2xl); }
   .overlay__box { max-height: 94vh; padding: var(--sp-4); }
 }
@@ -710,8 +795,8 @@
   }
   .own__length b { font-size: calc(var(--fs-2xl) * var(--hud-scale)); }
   .ctrl-picker { grid-template-columns: 1fr; }
-  .ctrl-opt { flex-direction: row; align-items: center; gap: 10px; }
-  .ctrl-opt canvas { width: 84px; flex: none; }
+  .ctrl-opt { flex-direction: row; align-items: center; gap: 12px; }
+  .ctrl-opt canvas { width: 96px; height: 72px; flex: none; }
 }
 
 @media (max-width: 720px) {

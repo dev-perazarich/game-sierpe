@@ -60,11 +60,14 @@ const app = createApp({
       :profile="profile"
       :theme="theme"
       :fps="fps"
+      :offline-ready="offlineReady"
+      :can-install="canInstall"
       @play="startGame"
       @setting="onSetting"
       @appearance="onAppearance"
       @name="onName"
       @mode="currentModeId = $event"
+      @install="doInstall"
     />
 
     <div v-show="screen === 'game'" class="screen screen--game">
@@ -119,6 +122,7 @@ const app = createApp({
     const compactHud = ref(window.innerWidth < 720);
     const updateReady = ref(null);      // función para aplicar la actualización
     const canInstall = ref(false);
+    const offlineReady = ref(false);    // el service worker ya controla la página
 
     const theme = computed(() => getTheme(profile.settings.theme));
     const modeName = computed(() => getMode(currentModeId.value).name);
@@ -159,6 +163,12 @@ const app = createApp({
       const install = installPrompt({ onAvailable: (v) => { canInstall.value = v; } });
       promptInstall = () => install.prompt();
       wakeLock = new WakeLock();
+
+      // "Sin conexión listo" significa que un service worker ya controla esta
+      // página, no que se haya registrado: hasta que toma el control, una
+      // recarga sin red seguiría fallando.
+      if (navigator.serviceWorker?.controller) offlineReady.value = true;
+      navigator.serviceWorker?.ready.then(() => { offlineReady.value = true; }).catch(() => {});
 
       // Acceso directo del manifiesto: ?modo=royale entra directo a ese modo.
       const shortcut = requestedMode();
@@ -494,8 +504,10 @@ const app = createApp({
     return {
       screen, paused, fps, canvasEl, profile, snap, results, records, unlocks,
       currentModeId, modeName, theme, compactHud,
+      offlineReady, canInstall, updateReady,
       startGame, togglePause, resume, restart, goToMenu, chooseCard,
       onSetting, onAppearance, onName,
+      doInstall: () => promptInstall(),
     };
   },
 });
