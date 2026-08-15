@@ -9,6 +9,25 @@ como archivos estáticos y ya funciona.
 Inspirado en el género de serpientes multijugador (Slither.io, Snake.io), pero
 con motor, IA, modos y arte escritos desde cero.
 
+## Cómo se desarrolló
+
+Este proyecto se programó con **Claude Code** como herramienta de escritura de
+código, bajo dirección humana en arquitectura y diseño.
+
+El reparto fue este: las decisiones de arquitectura y producto —prescindir de
+paso de compilación, separar el estado autoritativo del renderizado, qué modos
+construir, cómo debía sentirse la cámara y el giro, qué dirección visual seguir—
+son mías, igual que la revisión y validación de cada resultado. La escritura del
+código y las pruebas de verificación las produjo la IA a partir de esas
+decisiones.
+
+Se dice abiertamente por dos razones. La primera es que quien lea el código
+merece saber cómo se escribió. La segunda es que explica el alcance: un proyecto
+de este tamaño (~11.600 líneas, 53 módulos, seis modos y una IA de tres capas)
+no habría sido viable en solitario en este plazo. La herramienta comprimió el
+tiempo de implementación; no sustituyó los criterios de ingeniería con que se
+tomaron las decisiones ni la verificación de que el resultado funciona.
+
 ---
 
 ## Arrancarlo en local
@@ -108,7 +127,6 @@ src/
   meta/         perfil, logros, cosméticos, almacenamiento
   audio/        sintetizador WebAudio (sin archivos de sonido)
   ui/           componentes Vue
-legacy/         primera versión del juego, conservada como referencia
 ```
 
 Un par de decisiones que explican el resto del código:
@@ -152,6 +170,21 @@ orbes, sobre un presupuesto de 4 ms.
 
 ## Licencia
 
-Pendiente de elegir. Hasta que se añada un archivo de licencia, se aplican los
-derechos de autor por defecto: el código es visible pero no hay permiso explícito
-de reutilización.
+**GNU Affero General Public License v3.0** — texto completo en [LICENSE](LICENSE).
+
+Copyright © 2026 dev-perazarich
+
+En corto, y sin que esto sustituya al texto legal:
+
+- Puedes usar, estudiar, modificar y redistribuir este juego libremente.
+- Si publicas una versión modificada, **debes publicar su código completo** bajo
+  esta misma licencia.
+- Eso incluye **alojarlo en un servidor**: aunque no distribuyas archivos, si
+  ofreces el juego a través de una red tienes que ofrecer también su código. Es
+  la diferencia entre la AGPL y la GPL corriente, y es deliberada — este es un
+  juego de navegador.
+- Hay que mantener el aviso de autoría.
+
+El titular del copyright conserva todos sus derechos sobre la obra y puede
+otorgar licencias comerciales distintas a quien las solicite. Si quieres usar
+este código en un producto cerrado, abre un issue.

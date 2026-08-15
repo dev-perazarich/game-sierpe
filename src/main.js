@@ -1,3 +1,17 @@
+/*
+ * Sierpe — arcade de serpientes para navegador.
+ * Copyright (C) 2026 dev-perazarich
+ *
+ * Este programa es software libre: puedes redistribuirlo y/o modificarlo bajo
+ * los términos de la Licencia Pública General Affero de GNU, versión 3, tal
+ * como la publica la Free Software Foundation.
+ *
+ * Se distribuye con la esperanza de que resulte útil, pero SIN NINGUNA GARANTÍA;
+ * ni siquiera la garantía implícita de COMERCIABILIDAD o IDONEIDAD PARA UN FIN
+ * DETERMINADO. Consulta la Licencia Pública General Affero de GNU para más
+ * detalles: <https://www.gnu.org/licenses/>.
+ */
+
 /**
  * main.js — Punto de entrada. Une Vue (pantallas y HUD) con el motor (canvas).
  *
