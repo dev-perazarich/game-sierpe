@@ -855,3 +855,264 @@
   .hud__leaderboard { width: 124px; }
   .mode-card__time { display: none; }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   PARTIDAS EN RED — diálogo de sala (RoomDialog) y sala de
+   espera (LobbyScreen). Bloque añadido al final: solo clases
+   nuevas, ninguna regla anterior modificada.
+═══════════════════════════════════════════════════════════ */
+
+/* ── Pestañas ── */
+.tabs {
+  display: flex;
+  gap: var(--sp-1);
+  padding: 3px;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-md);
+  background: var(--bg);
+}
+.tabs button {
+  flex: 1;
+  padding: 9px 12px;
+  border: 0;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--text-2);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+}
+.tabs button:hover { color: var(--text); }
+.tabs button.is-active {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-sm);
+}
+
+.room-panel { display: flex; flex-direction: column; gap: var(--sp-5); }
+
+/* ── Avisos ──
+   Un aviso no es un adorno: se lee antes de decidir. Va sobre --surface para
+   despegarse del cuerpo del diálogo, que es --bg-2, y el color de la banda
+   izquierda dice de qué tipo es sin necesidad de leerlo. */
+.notice {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 14px;
+  border-left: 3px solid var(--line);
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+  background: var(--surface);
+  font-size: var(--fs-sm);
+  color: var(--text-2);
+}
+.notice__title { color: var(--text); font-weight: 650; }
+.notice--info { border-left-color: var(--accent); }
+.notice--warn { border-left-color: var(--warn); }
+.notice--danger { border-left-color: var(--danger); }
+.notice ul { display: flex; flex-direction: column; gap: 5px; margin-top: 3px; }
+.notice li { padding-left: 13px; text-indent: -13px; }
+.notice li::before { content: '· '; color: var(--text-3); }
+
+/* ── Plazas de la sala ── */
+.plazas { display: flex; align-items: center; gap: 5px; min-height: 12px; }
+.plazas__dot { width: 11px; height: 11px; border-radius: 50%; }
+
+/* ── Código de sala ── */
+.codigo { display: flex; flex-direction: column; gap: 6px; }
+.codigo__row { display: flex; align-items: center; gap: var(--sp-2); }
+.codigo__row .btn { flex: none; }
+
+.codigo__valor {
+  flex: 1;
+  min-width: 0;
+  padding: 12px 16px;
+  border: 1px dashed var(--line);
+  border-radius: var(--r-md);
+  background: var(--bg-2);
+  color: var(--text);
+  font-family: var(--f-mono);
+  font-size: var(--fs-xl);
+  letter-spacing: .16em;
+  text-align: center;
+  white-space: nowrap;
+  overflow-x: auto;
+  /* Para quien no pueda usar el botón: una pulsación larga selecciona el
+     código entero y no medio código. */
+  user-select: all;
+  -webkit-user-select: all;
+}
+.codigo__ok { min-height: 15px; font-size: var(--fs-xs); color: var(--ok); }
+
+.input--codigo {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--f-mono);
+  letter-spacing: .06em;
+}
+
+/* ── Sala de espera ── */
+.screen--lobby {
+  display: grid;
+  place-items: center;
+  overflow-y: auto;
+  touch-action: pan-y;
+  padding: var(--sp-5) var(--sp-4);
+  background:
+    radial-gradient(120% 80% at 50% -10%, var(--surface) 0%, transparent 60%),
+    var(--bg);
+}
+
+.lobby {
+  width: 100%;
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+  padding: var(--sp-4) 0;
+}
+.lobby__section { display: flex; flex-direction: column; gap: var(--sp-3); }
+
+.lobby__state {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--fs-sm);
+  color: var(--text-2);
+}
+.lobby__state::before {
+  content: '';
+  flex: none;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--warn);
+}
+.lobby__state.is-ok::before { background: var(--ok); }
+.lobby__state.is-error::before { background: var(--danger); }
+
+.lobby__actions { display: flex; flex-direction: column; gap: var(--sp-2); }
+
+.lobby__waiting {
+  padding: 15px;
+  border: 1px dashed var(--line);
+  border-radius: var(--r-md);
+  text-align: center;
+  font-size: var(--fs-sm);
+  color: var(--text-2);
+}
+
+/* ── Lista de jugadores ── */
+.players { display: flex; flex-direction: column; gap: 1px; }
+.players li {
+  display: grid;
+  grid-template-columns: 11px 1fr auto;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: 10px 2px;
+  border-bottom: 1px solid var(--line-soft);
+}
+.player__dot { width: 11px; height: 11px; border-radius: 50%; background: var(--text-3); }
+.player__dot.is-ok { background: var(--ok); }
+.player__dot.is-wait { background: var(--warn); }
+.player__dot.is-bad { background: var(--danger); }
+
+.player__body { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.player__name {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.player__tag { font-size: var(--fs-xs); color: var(--text-3); }
+.player__ping {
+  font-size: var(--fs-xs);
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+.player__ping.is-mid { color: var(--warn); }
+.player__ping.is-bad { color: var(--danger); }
+
+/* ── Invitación a mano ── */
+.manual { gap: var(--sp-4); }
+.manual__row { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+.manual__row .btn { flex: 1; min-width: 132px; }
+
+.manual__guest {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: var(--sp-3);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-md);
+  background: var(--bg-2);
+}
+
+/* El bloque de invitación es una tira larga sin espacios: sin word-break
+   desborda el diálogo en lugar de partirse. */
+.blob {
+  min-height: 84px;
+  resize: vertical;
+  font-family: var(--f-mono);
+  font-size: var(--fs-xs);
+  line-height: 1.5;
+  word-break: break-all;
+}
+
+@media (max-width: 420px) {
+  /* Se repite la regla estrecha de .tabs: al declararse las pestañas más
+     abajo en el archivo, su padding base ganaba a la de arriba. */
+  .tabs button { font-size: var(--fs-xs); padding: 8px 4px; }
+  .codigo__valor { padding: 10px 12px; font-size: var(--fs-lg); letter-spacing: .1em; }
+  .manual__row .btn { min-width: 0; }
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .screen--lobby { align-items: start; padding: 12px; }
+  .lobby { gap: var(--sp-3); padding: 0; }
+  .codigo__valor { padding: 8px 12px; font-size: var(--fs-lg); }
+  .room-panel { gap: var(--sp-4); }
+  .blob { min-height: 64px; }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Añadidos posteriores. Igual que el bloque anterior: solo
+   clases nuevas, ninguna regla de arriba tocada.
+═══════════════════════════════════════════════════════════ */
+
+/* ── Avisos de cabecera del diálogo de sala ──
+   Van pegados entre sí y separados del resto por el hueco del cuerpo: se leen
+   como un bloque, no como dos secciones sueltas. El hueco propio del cuerpo
+   (--sp-5) los habría dejado tan lejos uno de otro que el segundo parecería el
+   principio de la configuración. */
+.room-lead { display: flex; flex-direction: column; gap: var(--sp-2); }
+
+/* ── Detalle técnico de un fallo de red ──
+   El mensaje crudo del navegador no es para el jugador, pero es lo único que
+   sirve cuando hay que contarle el fallo a quien pueda arreglarlo. Va plegado y
+   en voz baja: quien no lo abra, no lo ve. */
+.detalle { font-size: var(--fs-xs); color: var(--text-3); }
+.detalle > summary {
+  /* Zona de toque decente en móvil: un resumen de once píxeles es imposible de
+     acertar con el dedo. */
+  padding: 8px 2px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.detalle > summary:hover { color: var(--text-2); }
+
+.detalle__texto {
+  padding: 10px 12px;
+  border-radius: var(--r-sm);
+  background: var(--bg-2);
+  font-family: var(--f-mono);
+  line-height: 1.55;
+  /* Estos mensajes son una sola línea larguísima y con pocos espacios donde
+     partir: sin esto se salen del ancho del móvil en vez de plegarse. */
+  overflow-wrap: anywhere;
+}
