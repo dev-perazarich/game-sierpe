@@ -50,7 +50,8 @@ export class Camera {
     if (target && target.alive) {
       const r = target.radius;
       const t = (r - CFG.snake.radiusMin) / (CFG.snake.radiusMax - CFG.snake.radiusMin);
-      this.targetZoom = c.zoomMax + (c.zoomMin - c.zoomMax) * clamp(t, 0, 1);
+      this.targetZoom = (c.zoomMax + (c.zoomMin - c.zoomMax) * clamp(t, 0, 1))
+                      * this._viewportScale();
 
       if (c.lookahead > 0) {
         // Desactivado por defecto. Se deja como palanca en config.js por si
@@ -67,6 +68,25 @@ export class Camera {
     this.zoom = damp(this.zoom, this.targetZoom, c.smoothZoom, dt);
     this.shakeX = shake.x;
     this.shakeY = shake.y;
+  }
+
+  /**
+   * Corrección de zoom según el tamaño de la pantalla.
+   *
+   * El zoom por tamaño de serpiente, aplicado tal cual, hace que en un móvil
+   * veas una fracción diminuta del mundo: la misma escala en 380 px de ancho
+   * enseña cuatro veces menos superficie que en un monitor. Aquí se compensa
+   * tomando el lado corto de la ventana contra una referencia de escritorio, de
+   * modo que el área de mundo visible se mantiene parecida en cualquier
+   * dispositivo y en cualquier orientación.
+   */
+  _viewportScale() {
+    const shortSide = Math.min(this.viewW, this.viewH);
+    if (!shortSide) return 1;
+    const REFERENCIA = 900;
+    // Acotado: ni pantallas enormes se alejan sin fin, ni un móvil se aleja
+    // tanto que la serpiente quede irreconocible.
+    return clamp(Math.sqrt(shortSide / REFERENCIA), 0.62, 1.15);
   }
 
   /** Rectángulo visible en coordenadas de mundo, con margen para el culling. */

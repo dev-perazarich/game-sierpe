@@ -48,6 +48,42 @@ npx serve .
 
 Luego abre `http://localhost:8000`.
 
+## Instalarlo como aplicación
+
+Es una PWA completa: se instala en el móvil o en el escritorio y **funciona sin
+conexión**. No hay ninguna dependencia externa —Vue va servido desde el propio
+repositorio, el sonido está sintetizado y las fuentes son del sistema—, así que
+una vez instalada no necesita red para nada.
+
+- **Android / Chrome / Edge** — el navegador ofrecerá «Instalar aplicación».
+- **iOS / Safari** — Compartir → «Añadir a pantalla de inicio».
+- **Escritorio** — icono de instalación en la barra de direcciones.
+
+El service worker precarga los 67 archivos del juego en la instalación. Las
+actualizaciones se aplican al abrir de nuevo la aplicación, nunca en mitad de
+una partida.
+
+> Al tocar código, hay que añadir el archivo a `PRECACHE` en [`sw.js`](sw.js) y
+> subir `CACHE_VERSION`. Es el precio de no tener paso de compilación; como red
+> de seguridad, el service worker cachea igualmente lo que falte en la lista.
+
+## Controles
+
+**Ratón y teclado** — el puntero dirige, clic o <kbd>espacio</kbd> aceleran,
+<kbd>Esc</kbd> pausa. <kbd>WASD</kbd> y las flechas también sirven.
+
+**Táctil** — tres esquemas a elegir en Ajustes, con vista previa animada:
+
+| Esquema | Cómo funciona |
+|---|---|
+| **Flecha** | Arrastras desde cualquier punto y la serpiente sigue la dirección del arrastre. Permite jugar con el dedo lejos de la cabeza. |
+| **Clásico** | La serpiente va hacia tu dedo, igual que con el ratón. |
+| **Joystick** | Mando virtual flotante donde apoyes el dedo. El más preciso en giros sostenidos. |
+
+En los tres, un segundo dedo en cualquier parte de la pantalla acelera. Funciona
+en vertical y en apaisado, y el zoom se ajusta al tamaño de la pantalla para que
+el área de juego visible sea comparable en un móvil y en un monitor.
+
 ## Publicarlo
 
 Es un sitio estático puro, así que no necesita configuración:
@@ -115,13 +151,18 @@ código propio son módulos ES nativos, sin bundler.
 
 ```
 index.html
-css/            tokens · componentes · pantallas
+manifest.webmanifest   metadatos de instalación
+sw.js                  service worker (precarga y modo sin conexión)
+css/                   tokens · componentes · pantallas
+icons/                 iconos PNG de la aplicación
+vendor/                Vue 3 servido en local, con su licencia MIT
 src/
   config.js     todas las constantes ajustables
+  pwa.js        service worker, bloqueo de pantalla, instalación
   engine/       bucle, mundo, cámara, entrada, colisión, hash espacial, RNG
   entities/     Snake, Orb, Pickup
   ai/           percepción, dirección, comportamientos, personalidades, director
-  render/       renderizador, fondo, cuerpo, efectos, minimapa, sprites
+  render/       renderizador, fondo, cuerpo, efectos, minimapa, controles táctiles
   themes/       panal · abismo · circuito · pradera
   modes/        contrato común + los seis modos
   meta/         perfil, logros, cosméticos, almacenamiento
@@ -167,6 +208,15 @@ issues son bienvenidos.
 
 Rendimiento medido: 1,3–3,0 ms de lógica por paso con 52 serpientes y 4.600
 orbes, sobre un presupuesto de 4 ms.
+
+## Dependencias de terceros
+
+Solo una: **Vue 3**, servida desde [`vendor/`](vendor/) en lugar de un CDN para
+que el juego funcione sin conexión. Se distribuye bajo licencia MIT, cuyo texto
+se conserva en [`vendor/vue-LICENSE.txt`](vendor/vue-LICENSE.txt).
+
+Todo lo demás —motor, IA, render, audio, iconos— es código propio de este
+repositorio.
 
 ## Licencia
 

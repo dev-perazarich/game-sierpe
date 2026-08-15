@@ -13,12 +13,25 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
-  <meta name="theme-color" content="#04101C" />
-  <meta name="description" content="Arcade de serpientes con cinco modos de juego, bots con personalidad y tres temas visuales." />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no, maximum-scale=1.0" />
+  <meta name="theme-color" content="#14161F" />
+  <meta name="description" content="Arcade de serpientes con cinco modos de juego, bots con personalidad y cuatro temas visuales. Funciona sin conexión." />
   <title>Sierpe</title>
 
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'><circle cx='24' cy='24' r='22' fill='%2304101C'/><path d='M10 34c0-8 8-10 14-10s10-2 10-7-4-7-8-5' fill='none' stroke='%234fd6c8' stroke-width='6' stroke-linecap='round'/></svg>" />
+  <!-- ══ PWA ══ -->
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png" />
+
+  <!-- iOS no lee el manifiesto: necesita sus propias etiquetas para
+       instalarse a pantalla completa desde "Añadir a pantalla de inicio". -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Sierpe" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="color-scheme" content="dark" />
 
   <link rel="stylesheet" href="css/tokens.css" />
   <link rel="stylesheet" href="css/ui.css" />
@@ -46,15 +59,18 @@
   </noscript>
 
   <!--
-    Vue 3 desde CDN, build "global" porque incluye el compilador de plantillas:
-    los componentes definen su template como cadena dentro de módulos ES, sin
-    paso de build. Se carga antes que main.js para que `Vue` exista al importar.
+    Vue 3 servido desde el propio repositorio, no desde un CDN: el juego tiene
+    que arrancar sin conexión, y una dependencia externa lo impediría. Se usa la
+    build "global" porque incluye el compilador de plantillas, que hace falta al
+    definir los componentes con `template` en cadena sin paso de compilación.
 
-    Se usa la build de desarrollo, NO vue.global.prod.js: la de producción
-    elimina todos los avisos, y sin paso de build esos avisos son la única
-    señal cuando algo va mal. Para publicar, cambia a vue.global.prod.js.
+    Va antes que main.js para que `Vue` exista al importar los módulos.
+
+    Para depurar, cambia a vendor/vue.global.js (build de desarrollo): la de
+    producción elimina los avisos, y sin paso de compilación esos avisos son la
+    única señal cuando algo va mal.
   -->
-  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script src="vendor/vue.global.prod.js"></script>
   <script type="module" src="src/main.js"></script>
 </body>
 </html>

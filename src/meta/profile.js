@@ -16,6 +16,7 @@ const DEFAULT_SETTINGS = {
   sensitivity: 1,
   toggleBoost: false,
   deadzone: 26,
+  touchMode: 'flecha',        // 'clasico' | 'flecha' | 'joystick'
   masterVolume: 0.7,
   sfxVolume: 0.8,
   ambientVolume: 0.4,

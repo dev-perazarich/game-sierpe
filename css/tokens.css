@@ -163,8 +163,22 @@ body {
   font-size: var(--fs-md);
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
+
+  /* Endurecimiento táctil. Sin esto, en móvil un arrastre sobre el canvas
+     selecciona texto, saca el menú de "copiar imagen" o dispara el rebote de
+     recarga de la página en mitad de una partida. */
   -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
 }
+
+/* Los campos de texto sí deben permitir selección y escritura normal. */
+input, textarea, select { user-select: auto; -webkit-user-select: auto; touch-action: auto; }
+
+/* Las zonas con desplazamiento propio recuperan el gesto vertical. */
+.screen--menu, .screen--over, .overlay__box, .settings { touch-action: pan-y; }
 
 #app { width: 100%; height: 100%; position: relative; }
 

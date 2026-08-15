@@ -34,11 +34,12 @@ import { Renderer } from './render/renderer.js';
 import { FX } from './render/fx.js';
 import { Sfx } from './audio/sfx.js';
 import { getTheme, buildSkin } from './themes/index.js';
-import { instantiateMode, getMode } from './modes/index.js';
+import { instantiateMode, getMode, MODES } from './modes/index.js';
 import { Profile } from './meta/profile.js';
 import { sanitizeAppearance } from './meta/cosmetics.js';
 import { evaluate } from './meta/achievements.js';
 import { seedFromDate } from './engine/rng.js';
+import { registerServiceWorker, WakeLock, installPrompt, requestedMode } from './pwa.js';
 
 import { MenuScreen } from './ui/MenuScreen.js';
 import { HudOverlay } from './ui/HudOverlay.js';
@@ -116,6 +117,8 @@ const app = createApp({
     const unlocks = ref({ achievements: [], cosmetics: [] });
     const currentModeId = ref(profile.lastMode);
     const compactHud = ref(window.innerWidth < 720);
+    const updateReady = ref(null);      // función para aplicar la actualización
+    const canInstall = ref(false);
 
     const theme = computed(() => getTheme(profile.settings.theme));
     const modeName = computed(() => getMode(currentModeId.value).name);
@@ -131,6 +134,8 @@ const app = createApp({
     let cleanups = [];
     let qualityWatch = { low: 0, high: 0 };
     let audioUnlocked = false;
+    let wakeLock = null;
+    let promptInstall = () => {};
 
     // ── Preparación inicial ────────────────────────────────
     sanitizeAppearance(profile.appearance, profile);
@@ -146,6 +151,33 @@ const app = createApp({
     onMounted(() => {
       applyChrome();
       applyQuality();
+
+      // ── Aplicación instalable ──
+      registerServiceWorker({
+        onUpdateReady: (apply) => { updateReady.value = apply; },
+      });
+      const install = installPrompt({ onAvailable: (v) => { canInstall.value = v; } });
+      promptInstall = () => install.prompt();
+      wakeLock = new WakeLock();
+
+      // Acceso directo del manifiesto: ?modo=royale entra directo a ese modo.
+      const shortcut = requestedMode();
+      if (shortcut && MODES[shortcut]) currentModeId.value = shortcut;
+
+      /**
+       * Pausa automática al salir de la aplicación.
+       *
+       * En móvil es imprescindible: al llegar una notificación o cambiar de app,
+       * el juego seguía corriendo y volvías muerto. El acumulador del bucle ya
+       * limita el salto de tiempo, pero eso evita el bloqueo, no la injusticia.
+       */
+      const onVisibility = () => {
+        if (document.visibilityState === 'hidden' && screen.value === 'game' && !paused.value) {
+          togglePause();
+        }
+      };
+      document.addEventListener('visibilitychange', onVisibility);
+      window.addEventListener('pagehide', onVisibility);
 
       const onResize = () => {
         compactHud.value = window.innerWidth < 720;
@@ -206,6 +238,7 @@ const app = createApp({
       input = new Input(canvasEl.value);
       input.deadzone = settings.deadzone;
       input.toggleBoost = settings.toggleBoost;
+      input.touchMode = settings.touchMode;
       input.onPause(() => togglePause());
       cleanups.push(input.attach());
 
@@ -301,7 +334,7 @@ const app = createApp({
       camera.update(rawDt, target, world.bounds, fx.shake);
       if (bonus) camera.zoom = Math.max(0.4, camera.zoom - bonus);
 
-      renderer.draw(world, camera, theme.value, fx, alpha, rawDt);
+      renderer.draw(world, camera, theme.value, fx, alpha, rawDt, input);
     }
 
     function finish() {
@@ -433,6 +466,7 @@ const app = createApp({
           break;
         case 'deadzone':      if (input) input.deadzone = value; break;
         case 'toggleBoost':   if (input) input.toggleBoost = value; break;
+        case 'touchMode':     if (input) input.touchMode = value; break;
         case 'masterVolume':
         case 'sfxVolume':
         case 'ambientVolume':

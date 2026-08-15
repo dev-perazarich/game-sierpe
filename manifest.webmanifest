@@ -1,0 +1,53 @@
+{
+  "name": "Sierpe — arcade de serpientes",
+  "short_name": "Sierpe",
+  "description": "Arcade de serpientes con cinco modos de juego, bots con personalidad y cuatro temas visuales. Funciona sin conexión.",
+  "id": "/",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "display_override": ["fullscreen", "standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#14161F",
+  "theme_color": "#14161F",
+  "lang": "es",
+  "dir": "ltr",
+  "categories": ["games", "entertainment"],
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Desafío diario",
+      "short_name": "Diario",
+      "description": "El mismo mundo para todos hoy",
+      "url": "./?modo=daily",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Cerco",
+      "short_name": "Cerco",
+      "description": "Battle royale con zona que se contrae",
+      "url": "./?modo=royale",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

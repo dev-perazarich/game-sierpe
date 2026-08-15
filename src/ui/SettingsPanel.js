@@ -8,8 +8,11 @@
 
 import { THEME_LIST } from '../themes/index.js';
 import { DIFFICULTY_LIST } from '../ai/personalities.js';
+import { TouchControlPicker } from './TouchControlPicker.js';
+import { getTheme } from '../themes/index.js';
 
 export const SettingsPanel = {
+  components: { TouchControlPicker },
   props: {
     settings: { type: Object, required: true },
     fps: { type: Number, default: 0 },
@@ -17,6 +20,12 @@ export const SettingsPanel = {
   emits: ['change'],
 
   setup(props, { emit }) {
+    // El selector táctil solo se muestra donde sirve de algo. Se detecta por
+    // capacidad, no por tamaño de pantalla: hay portátiles táctiles y monitores
+    // pequeños, y confundir ambos casos deja a alguien sin sus controles.
+    const hasTouch = Vue.computed(() =>
+      ('ontouchstart' in window) || navigator.maxTouchPoints > 0);
+    const themeObj = Vue.computed(() => getTheme(props.settings.theme));
     const themes = THEME_LIST;
     const difficulties = DIFFICULTY_LIST;
     const qualities = [
@@ -30,7 +39,7 @@ export const SettingsPanel = {
     const num = (key) => (e) => set(key, Number(e.target.value));
     const bool = (key) => (e) => set(key, e.target.checked);
 
-    return { themes, difficulties, qualities, set, num, bool };
+    return { themes, difficulties, qualities, set, num, bool, hasTouch, themeObj };
   },
 
   template: `
@@ -88,6 +97,20 @@ export const SettingsPanel = {
           <input type="checkbox" :checked="settings.showFps" @change="bool('showFps')" />
           <span>Mostrar FPS <span class="field__hint" v-if="fps">— ahora: {{ fps }}</span></span>
         </label>
+      </section>
+
+      <section class="settings__group" v-if="hasTouch">
+        <h3 class="settings__title">Controles táctiles</h3>
+
+        <TouchControlPicker
+          :model-value="settings.touchMode"
+          :theme="themeObj"
+          @update:model-value="set('touchMode', $event)"
+        />
+
+        <p class="field__hint">
+          Para acelerar, apoya un segundo dedo en cualquier parte de la pantalla.
+        </p>
       </section>
 
       <section class="settings__group">

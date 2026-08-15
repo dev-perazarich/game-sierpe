@@ -13,6 +13,7 @@
 import { Background } from './background.js';
 import { drawSnake, drawNameplate } from './snakeRenderer.js';
 import { drawMinimap } from './minimap.js';
+import { drawTouchControls } from './touchControls.js';
 import { orbSprite, glowSprite, tinted, drawSprite } from './sprites.js';
 import { rgba, clamp } from '../engine/math.js';
 import { ORB_KIND } from '../entities/Orb.js';
@@ -63,7 +64,7 @@ export class Renderer {
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 
-  draw(world, camera, theme, fx, alpha, dt) {
+  draw(world, camera, theme, fx, alpha, dt, input = null) {
     const ctx = this.ctx;
     const q = this.quality;
     this.time += dt;
@@ -109,6 +110,13 @@ export class Renderer {
     fx.drawOverlay(ctx, this.cssW, this.cssH);
 
     this._drawEdgeWarning(ctx, world, theme);
+
+    // Ayuda visual del gesto táctil, lo último para que quede sobre todo.
+    if (input) {
+      const p = world.player;
+      const headScreen = p && p.alive ? camera.worldToScreen(p.head.x, p.head.y) : null;
+      drawTouchControls(ctx, input.overlay, theme, headScreen);
+    }
   }
 
   _drawOrbs(ctx, world, view, theme, quality) {

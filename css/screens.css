@@ -632,7 +632,87 @@
 
 .over__actions { display: flex; flex-direction: column; gap: var(--sp-2); margin-top: var(--sp-2); }
 
+/* ── Selector de control táctil ── */
+.ctrl-picker {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--sp-2);
+}
+
+.ctrl-opt {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-md);
+  background: var(--bg-2);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+.ctrl-opt:hover { border-color: var(--text-3); }
+.ctrl-opt.is-active {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+  background: var(--surface);
+}
+.ctrl-opt canvas {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--r-sm);
+  background: var(--bg);
+}
+.ctrl-opt__name { font-size: var(--fs-sm); font-weight: 650; }
+.ctrl-opt__desc { font-size: var(--fs-xs); color: var(--text-3); line-height: 1.4; }
+
 /* ═══════════ MÓVIL ═══════════ */
+
+/*
+ * Apaisado y poca altura: es la postura habitual para jugar en móvil, y ahí el
+ * enemigo es el alto, no el ancho. Se comprime todo verticalmente y los paneles
+ * se apartan del centro.
+ */
+@media (orientation: landscape) and (max-height: 500px) {
+  .hud { padding: 8px 10px; }
+  .hud__leaderboard { top: 8px; width: 150px; }
+  .killfeed { display: none; }
+  .teams { top: 52px; width: 176px; padding: 6px 9px; }
+  .objectives { display: none; }
+  .stat-chip { padding: 4px 9px; min-width: 56px; }
+  .stat-chip__value { font-size: calc(var(--fs-md) * var(--hud-scale)); }
+  .own__length b { font-size: calc(var(--fs-xl) * var(--hud-scale)); }
+  .banner { top: 6px; padding: 4px 12px; }
+  .powers { bottom: 6px; }
+  .streak { top: 52px; }
+
+  /* Menú y pantalla final: en 400 px de alto hay que poder desplazar. */
+  .screen--menu, .screen--over { align-items: start; padding: 12px; }
+  .menu { gap: var(--sp-3); padding: 0; }
+  .menu__head { gap: var(--sp-3); }
+  .logo__name { font-size: var(--fs-xl); }
+  .over__title { font-size: var(--fs-2xl); }
+  .overlay__box { max-height: 94vh; padding: var(--sp-4); }
+}
+
+/*
+ * Vertical estrecho: cabe menos a lo ancho, así que el ranking se reduce y los
+ * paneles del modo pasan a ocupar el ancho completo bajo la fila superior.
+ */
+@media (orientation: portrait) and (max-width: 560px) {
+  .hud__leaderboard { width: 118px; }
+  .teams {
+    left: max(10px, env(safe-area-inset-left));
+    right: max(10px, env(safe-area-inset-right));
+    width: auto;
+    top: 58px;
+  }
+  .own__length b { font-size: calc(var(--fs-2xl) * var(--hud-scale)); }
+  .ctrl-picker { grid-template-columns: 1fr; }
+  .ctrl-opt { flex-direction: row; align-items: center; gap: 10px; }
+  .ctrl-opt canvas { width: 84px; flex: none; }
+}
 
 @media (max-width: 720px) {
   .hud__leaderboard { width: 132px; }
