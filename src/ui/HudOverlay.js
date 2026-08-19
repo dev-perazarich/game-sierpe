@@ -16,12 +16,27 @@ export const HudOverlay = {
     settings: { type: Object, required: true },
     fps: { type: Number, default: 0 },
     compact: { type: Boolean, default: false },
+    gyroAvailable: { type: Boolean, default: false },
   },
-  emits: ['pause', 'card'],
+  emits: ['pause', 'card', 'manual-rotate'],
 
   setup(props) {
     const m = Vue.computed(() => props.snap.mode ?? {});
-    return { m };
+    const width = Vue.ref(window.innerWidth);
+    const height = Vue.ref(window.innerHeight);
+    const isLandscape = Vue.computed(() => width.value > height.value);
+    const canRotate = Vue.computed(() => isLandscape.value && (!props.settings.gyroEnabled || !props.gyroAvailable));
+
+    Vue.onMounted(() => {
+      const onResize = () => {
+        width.value = window.innerWidth;
+        height.value = window.innerHeight;
+      };
+      window.addEventListener('resize', onResize);
+      window.addEventListener('orientationchange', onResize);
+    });
+
+    return { m, canRotate };
   },
 
   template: `
@@ -38,6 +53,15 @@ export const HudOverlay = {
         <div class="hud__stats">
           <button class="btn btn--icon" type="button" @click="$emit('pause')" aria-label="Pausa">
             ❚❚
+          </button>
+          <button
+            v-if="canRotate"
+            class="btn btn--icon"
+            :class="{ 'is-locked': settings.manualRotation === 180 }"
+            @click="$emit('manual-rotate')"
+            aria-label="Rotar vista"
+          >
+            🔄
           </button>
           <div class="stat-chip" v-if="m.primary" :class="{ 'is-alert': m.primary.alert }">
             <span class="stat-chip__label">{{ m.primary.label }}</span>

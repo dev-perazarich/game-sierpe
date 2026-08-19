@@ -288,6 +288,12 @@
 
 .screen--game { background: var(--bg); }
 
+.game-canvas-wrap {
+  position: absolute;
+  inset: 0;
+  transform-origin: center center;
+}
+
 .game-canvas {
   display: block;
   position: absolute;

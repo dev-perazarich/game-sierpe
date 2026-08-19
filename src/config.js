@@ -103,10 +103,11 @@ export const CFG = {
 export const QUALITY_LEVELS = ['low', 'medium', 'high'];
 
 export const BOT_NAMES = [
-  'Cobra', 'Mamba', 'Víbora', 'Boa', 'Pitón', 'Anaconda', 'Naga', 'Sierpe',
-  'Basilisco', 'Wyrm', 'Áspid', 'Krait', 'Tifón', 'Quetzal', 'Uroboros',
-  'Lamia', 'Escila', 'Yormun', 'Cascabel', 'Taipán', 'Coralillo', 'Bitis',
-  'Nidhogg', 'Apofis', 'Jörmun', 'Vasuki', 'Zahhak', 'Python', 'Serpens',
+  'Culebra', 'Tamagáz', 'Masacuata', 'Zumbadora', 'Bejuquilla',
+  'Coral', 'Coralillo', 'Lombriz', 'Cuetano',
+  'Sierpe', 'Boa', 'Pitón', 'Anaconda', 'Víbora',
+  'Basilisco', 'Mamba', 'Cascabel', 'Chupas',
+  'Tepelcúa', 'MeaPretas', 'MeaGarras',
 ];
 
 /** Masa → radio del cuerpo. Raíz cuadrada: crecer rápido al principio, lento después. */

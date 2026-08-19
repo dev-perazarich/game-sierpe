@@ -106,7 +106,7 @@ export class Renderer {
     }
 
     fx.drawTexts(ctx, camera);
-    drawMinimap(ctx, world, camera, theme, this.settings);
+    drawMinimap(ctx, world, camera, theme, this.settings, input?.gameRotation || 0);
     world.mode.drawHudCanvas?.(ctx, world, camera, theme, this.settings);
     fx.drawOverlay(ctx, this.cssW, this.cssH);
 

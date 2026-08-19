@@ -73,7 +73,9 @@ const app = createApp({
     />
 
     <div v-show="screen === 'game'" class="screen screen--game">
-      <canvas ref="canvasEl" class="game-canvas" aria-label="Área de juego"></canvas>
+      <div class="game-canvas-wrap" :style="{ transform: 'rotate(' + gameRotation + 'deg)' }">
+        <canvas ref="canvasEl" class="game-canvas" aria-label="Área de juego"></canvas>
+      </div>
 
       <HudOverlay
         v-if="screen === 'game'"
@@ -82,8 +84,10 @@ const app = createApp({
         :settings="profile.settings"
         :fps="fps"
         :compact="compactHud"
+        :gyro-available="gyroAvailable"
         @pause="togglePause"
         @card="chooseCard"
+        @manual-rotate="toggleManualRotation"
       />
 
       <PauseOverlay
@@ -125,6 +129,8 @@ const app = createApp({
     const updateReady = ref(null);      // función para aplicar la actualización
     const canInstall = ref(false);
     const offlineReady = ref(false);    // el service worker ya controla la página
+    const gameRotation = ref(0);        // rotación del juego en grados (0 | 180)
+    const gyroAvailable = ref(false);   // si el dispositivo reportó orientación
 
     const theme = computed(() => getTheme(profile.settings.theme));
     const modeName = computed(() => getMode(currentModeId.value).name);
@@ -255,6 +261,8 @@ const app = createApp({
       input.deadzone = settings.deadzone;
       input.toggleBoost = settings.toggleBoost;
       input.touchMode = settings.touchMode;
+      input.setGyroEnabled(settings.gyroEnabled);
+      input.setManualRotation(settings.manualRotation);
       input.onPause(() => togglePause());
       cleanups.push(input.attach());
 
@@ -386,6 +394,8 @@ const app = createApp({
 
     function draw(alpha, rawDt) {
       if (!world || !renderer) return;
+      gameRotation.value = input?.gameRotation || 0;
+      gyroAvailable.value = input?.gyroAvailable || false;
       const target = world.mode.cameraTarget
         ? world.mode.cameraTarget(world)
         : world.player;
@@ -495,6 +505,13 @@ const app = createApp({
       if (audioUnlocked) sfx.ui(paused.value ? 'back' : 'confirm');
     }
 
+    function toggleManualRotation() {
+      if (!input || screen.value !== 'game') return;
+      input.toggleManualRotation();
+      profile.settings.manualRotation = input.gameRotation;
+      profile.saveSettings();
+    }
+
     function resume() { paused.value = false; loop?.setPaused(false); }
 
     function restart() {
@@ -539,6 +556,8 @@ const app = createApp({
         case 'deadzone':      if (input) input.deadzone = value; break;
         case 'toggleBoost':   if (input) input.toggleBoost = value; break;
         case 'touchMode':     if (input) input.touchMode = value; break;
+        case 'gyroEnabled':   if (input) input.setGyroEnabled(value); break;
+        case 'manualRotation': if (input) input.setManualRotation(value); break;
         case 'masterVolume':
         case 'sfxVolume':
         case 'ambientVolume':
@@ -567,7 +586,8 @@ const app = createApp({
       screen, paused, fps, canvasEl, profile, snap, results, records, unlocks,
       currentModeId, modeName, theme, compactHud,
       offlineReady, canInstall, updateReady,
-      startGame, togglePause, resume, restart, goToMenu, chooseCard,
+      gameRotation, gyroAvailable,
+      startGame, togglePause, resume, restart, goToMenu, chooseCard, toggleManualRotation,
       onSetting, onAppearance, onName,
       doInstall: () => promptInstall(),
     };

@@ -11,6 +11,9 @@ package-lock.json
 .idea/
 *.swp
 
+# Graphify
+graphify-out/
+
 # Sistema
 Thumbs.db
 desktop.ini

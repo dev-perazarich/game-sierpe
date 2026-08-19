@@ -48,6 +48,12 @@ export class Input {
 
     this._detachers = [];
     this._onPause = null;
+
+    // ── Giroscopio / rotación del juego ──
+    this.gyroEnabled = false;
+    this.gameRotation = 0;          // 0 | 180 (grados)
+    this.screenOrientation = 'landscape-primary';
+    this.gyroAvailable = false;
   }
 
   /** Lo que necesita el renderizador para dibujar el indicador en pantalla. */
@@ -88,7 +94,7 @@ export class Input {
       this.keys.delete(e.code);
       if (e.code === 'Space' || e.code === 'ShiftLeft') this._setBoost(false);
     };
-    const onBlur = () => { this.keys.clear(); this.boosting = false; this.stick.active = false; };
+    const onBlur = () => { this.keys.clear(); this.boosting = false; this.touch.active = false; };
 
     add(window, 'keydown', onKeyDown);
     add(window, 'keyup', onKeyUp);
@@ -160,6 +166,23 @@ export class Input {
     add(c, 'touchend', endTouch, { passive: false });
     add(c, 'touchcancel', endTouch, { passive: false });
 
+    // ── Giroscopio / orientación ──
+    const onDeviceOrientation = () => {
+      this.gyroAvailable = true;
+    };
+    add(window, 'deviceorientation', onDeviceOrientation);
+
+    const updateOrientation = () => {
+      this.screenOrientation = screen.orientation?.type
+        || (window.matchMedia?.('(orientation: portrait)').matches ? 'portrait-primary' : 'landscape-primary');
+      this._updateGameRotation();
+    };
+    add(window, 'orientationchange', updateOrientation);
+    if (screen.orientation?.addEventListener) {
+      add(screen.orientation, 'change', updateOrientation);
+    }
+    updateOrientation();
+
     return () => this.detach();
   }
 
@@ -171,6 +194,28 @@ export class Input {
     this.touch.active = false;
     this.touch.id = -1;
     this.boostTouches.clear();
+  }
+
+  _updateGameRotation() {
+    if (this.gyroEnabled && this.gyroAvailable) {
+      const isLandscape = this.screenOrientation.startsWith('landscape');
+      this.gameRotation = isLandscape && this.screenOrientation === 'landscape-secondary' ? 180 : 0;
+    }
+    // Cuando el giroscopio está desactivado o no disponible, se preserva la
+    // rotación manual del usuario sin modificarla automáticamente.
+  }
+
+  setGyroEnabled(val) {
+    this.gyroEnabled = val;
+    this._updateGameRotation();
+  }
+
+  setManualRotation(val) {
+    this.gameRotation = val;
+  }
+
+  toggleManualRotation() {
+    this.gameRotation = this.gameRotation === 0 ? 180 : 0;
   }
 
   _setBoost(down) {
@@ -202,30 +247,41 @@ export class Input {
    */
   aim(snake, camera) {
     const kv = this._keyVector();
+    let angle = null;
+    let fromKeys = false;
 
     if (this.lastSource === 'keys' && kv) {
-      return Math.atan2(kv.y, kv.x);
-    }
-    if (this.lastSource === 'touch' && this.touch.active) {
-      return this._aimTouch(snake, camera);
-    }
-    if (this.pointerActive) {
+      angle = Math.atan2(kv.y, kv.x);
+      fromKeys = true;
+    } else if (this.lastSource === 'touch' && this.touch.active) {
+      angle = this._aimTouch(snake, camera);
+    } else if (this.pointerActive) {
       const head = camera.worldToScreen(snake.head.x, snake.head.y);
       const dx = this.pointerX - head.x;
       const dy = this.pointerY - head.y;
       // Zona muerta: junto a la cabeza el ángulo es ruido puro y la serpiente vibra.
       if (Math.hypot(dx, dy) < this.deadzone) return null;
-      return Math.atan2(dy, dx);
+      angle = Math.atan2(dy, dx);
     }
     // Si solo hay teclas pulsadas aunque la última fuente fuera el ratón, obedécelas.
-    if (kv) return Math.atan2(kv.y, kv.x);
-    return null;
+    if (kv && !fromKeys) angle = Math.atan2(kv.y, kv.x);
+
+    // Rotación del juego: ajusta el ángulo según la orientación actual.
+    // El teclado (WASD/flechas) es absoluto y no se gira.
+    if (angle !== null && this.gameRotation && !fromKeys) {
+      const rad = this.gameRotation * Math.PI / 180;
+      angle += rad;
+    }
+    return angle;
   }
 
   /**
    * Traduce el gesto táctil a un ángulo según el esquema elegido.
    * Devuelve null si el gesto aún no expresa una intención clara, y entonces la
    * serpiente sigue recta en vez de dar un tirón.
+   *
+   * El ángulo devuelto está en espacio de pantalla; la rotación del juego
+   * (orientación landscape invertida) la aplica `aim()`.
    */
   _aimTouch(snake, camera) {
     const t = this.touch;

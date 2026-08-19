@@ -17,13 +17,13 @@ const TEAM_SHAPES = ['circle', 'square', 'triangle', 'diamond'];
  * del mapa. Abajo a la derecha porque el ojo vive en el centro y las esquinas
  * inferiores son el sitio natural de la información de estado.
  */
-export function drawMinimap(ctx, world, camera, theme, settings) {
+export function drawMinimap(ctx, world, camera, theme, settings, rotation = 0) {
   if (!settings.showMinimap) return;
 
-  const size = settings.minimapSize ?? 132;
+  const size = settings.minimapSize ?? 99;
   const pad = 18;
-  const x = camera.viewW - size - pad;
-  const y = camera.viewH - size - pad;
+  const x = rotation === 180 ? camera.viewW - size - pad : pad;
+  const y = rotation === 180 ? camera.viewH - size - pad : pad;
   const cx = x + size / 2;
   const cy = y + size / 2;
   const radius = size / 2;

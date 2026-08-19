@@ -17,6 +17,8 @@ const DEFAULT_SETTINGS = {
   toggleBoost: false,
   deadzone: 26,
   touchMode: 'flecha',        // 'clasico' | 'flecha' | 'joystick'
+  gyroEnabled: false,
+  manualRotation: 0,          // 0 | 180 grados, usado cuando el giroscopio está desactivado
   masterVolume: 0.7,
   sfxVolume: 0.8,
   ambientVolume: 0.4,
@@ -26,7 +28,7 @@ const DEFAULT_SETTINGS = {
   screenShake: true,
   showNames: true,
   showMinimap: true,
-  minimapSize: 132,
+  minimapSize: 99,
   hudScale: 1,
   colorblindShapes: false,
   showFps: false,

@@ -111,6 +111,11 @@ export const SettingsPanel = {
         <p class="field__hint">
           Para acelerar, apoya un segundo dedo en cualquier parte de la pantalla.
         </p>
+
+        <label class="switch">
+          <input type="checkbox" :checked="settings.gyroEnabled" @change="bool('gyroEnabled')" />
+          <span>Usar giroscopio <span class="field__hint">— gira la vista al girar el dispositivo</span></span>
+        </label>
       </section>
 
       <section class="settings__group">

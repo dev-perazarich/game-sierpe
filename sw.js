@@ -13,7 +13,7 @@
  * más abajo cachea igualmente cualquier archivo que falte en la lista.
  */
 
-const CACHE_VERSION = 'v1.0.0';
+const CACHE_VERSION = 'v1.0.1';
 const CACHE_NAME = `sierpe-${CACHE_VERSION}`;
 
 const PRECACHE = [
