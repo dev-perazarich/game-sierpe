@@ -270,7 +270,7 @@ export class World {
     const deficit = this.orbTarget - this.orbs.count;
     if (deficit <= 0) return;
     // Como mucho unos pocos por paso: repoblar de golpe se nota como un parpadeo.
-    const batch = Math.min(deficit, 4);
+    const batch = Math.min(deficit, 6);
     for (let i = 0; i < batch; i++) {
       const p = this.mode.orbSpawnPoint
         ? this.mode.orbSpawnPoint(this)

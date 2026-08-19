@@ -11,9 +11,13 @@
  * Al añadir o quitar un módulo hay que actualizar PRECACHE y subir CACHE_VERSION.
  * Es el precio de no tener paso de compilación; a cambio, la red de seguridad de
  * más abajo cachea igualmente cualquier archivo que falte en la lista.
+ *
+ * IMPORTANTE: este archivo debe servirse con `Cache-Control: no-cache` o
+ * `no-store` para que el navegador detecte los cambios entre versiones.
+ * Si se cachea, la PWA no se actualiza aunque aquí se modifique.
  */
 
-const CACHE_VERSION = 'v1.0.1';
+const CACHE_VERSION = 'v1.0.0';
 const CACHE_NAME = `sierpe-${CACHE_VERSION}`;
 
 const PRECACHE = [

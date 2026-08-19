@@ -8,7 +8,9 @@
  *     Ahora gana la última fuente que se usó de verdad (`lastSource`).
  */
 
-import { TAU } from './math.js';
+import { TAU, damp, wrapAngle, clamp } from './math.js';
+
+console.log('[input] module loaded, wrapAngle =', typeof wrapAngle);
 
 export class Input {
   constructor(canvas) {
@@ -19,7 +21,7 @@ export class Input {
     this.pointerActive = false;
     this.boosting = false;
     this.lastSource = 'none';       // 'pointer' | 'keys' | 'touch'
-    this.deadzone = 26;
+    this.deadzone = 22;
     this.toggleBoost = false;       // ajuste: mantener frente a alternar
 
     /**
@@ -54,6 +56,8 @@ export class Input {
     this.gameRotation = 0;          // 0 | 180 (grados)
     this.screenOrientation = 'landscape-primary';
     this.gyroAvailable = false;
+    this._rawTargetAngle = null;    // ángulo sin suavizar
+    this.targetAngle = null;        // ángulo suavizado para la serpiente
   }
 
   /** Lo que necesita el renderizador para dibujar el indicador en pantalla. */
@@ -242,37 +246,63 @@ export class Input {
   }
 
   /**
-   * Traduce la entrada a un ángulo objetivo para la serpiente.
-   * Devuelve null si no hay intención nueva, y entonces la serpiente sigue recta.
+   * Traduce la entrada a un ángulo objetivo crudo para la serpiente.
+   * Guarda el resultado en `_rawTargetAngle` y lo devuelve; el suavizado
+   * se hace en `update(dt)` y el valor final se lee desde `getTargetAngle()`.
    */
   aim(snake, camera) {
     const kv = this._keyVector();
     let angle = null;
-    let fromKeys = false;
 
     if (this.lastSource === 'keys' && kv) {
       angle = Math.atan2(kv.y, kv.x);
-      fromKeys = true;
     } else if (this.lastSource === 'touch' && this.touch.active) {
       angle = this._aimTouch(snake, camera);
     } else if (this.pointerActive) {
       const head = camera.worldToScreen(snake.head.x, snake.head.y);
       const dx = this.pointerX - head.x;
       const dy = this.pointerY - head.y;
-      // Zona muerta: junto a la cabeza el ángulo es ruido puro y la serpiente vibra.
       if (Math.hypot(dx, dy) < this.deadzone) return null;
       angle = Math.atan2(dy, dx);
     }
-    // Si solo hay teclas pulsadas aunque la última fuente fuera el ratón, obedécelas.
-    if (kv && !fromKeys) angle = Math.atan2(kv.y, kv.x);
+    if (kv) angle = Math.atan2(kv.y, kv.x);
 
+    this._rawTargetAngle = angle;
+    return angle;
+  }
+
+  /**
+   * Devuelve el ángulo objetivo ya suavizado (o null si no hay input).
+   */
+  getTargetAngle() {
+    return this.targetAngle;
+  }
+
+  /**
+   * Suaviza el ángulo objetivo frame a frame para que el giro no sea robótico.
+   * Llamar una vez por frame con el dt del paso de simulación.
+   */
+  update(dt) {
+    if (this._rawTargetAngle !== null) {
+      const target = this._rawTargetAngle;
+      if (this.targetAngle === null) {
+        this.targetAngle = target;
+      } else {
+        const diff = wrapAngle(target - this.targetAngle);
+        const desired = this.targetAngle + clamp(diff, -Math.PI, Math.PI);
+        this.targetAngle = damp(this.targetAngle, desired, 18, dt);
+      }
+    }
     // Rotación del juego: ajusta el ángulo según la orientación actual.
     // El teclado (WASD/flechas) es absoluto y no se gira.
-    if (angle !== null && this.gameRotation && !fromKeys) {
+    if (this.targetAngle !== null && this.gameRotation && this._lastSourceWasKeys()) {
       const rad = this.gameRotation * Math.PI / 180;
-      angle += rad;
+      this.targetAngle += rad;
     }
-    return angle;
+  }
+
+  _lastSourceWasKeys() {
+    return this.lastSource === 'keys' && this.keys.size > 0;
   }
 
   /**

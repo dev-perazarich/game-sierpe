@@ -85,6 +85,17 @@ export function drawSnake(ctx, snake, theme, { quality = 'high', lod = 0, time =
 
   const boostPulse = snake.boosting ? 1 + Math.sin(time * 22) * 0.06 : 1;
 
+  // ── Pasada 0: sombra proyectada ──
+  if (quality !== 'low') {
+    ctx.save();
+    ctx.globalAlpha = 0.25;
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = r * 2 * boostPulse + 3;
+    ctx.filter = 'blur(4px)';
+    ctx.stroke(path);
+    ctx.restore();
+  }
+
   // ── Pasada 1: halo exterior ──
   if (body.glow > 0 && quality !== 'low') {
     ctx.save();
@@ -110,7 +121,7 @@ export function drawSnake(ctx, snake, theme, { quality = 'high', lod = 0, time =
   ctx.lineWidth = r * 2 * boostPulse;
   ctx.stroke(path);
 
-  // ── Pasada 4: luz interior ──
+  // ── Pasada 4: luz interior / especular ──
   if (body.innerLight > 0 && quality !== 'low') {
     ctx.save();
     ctx.globalCompositeOperation = body.innerBlend ?? 'lighter';
@@ -121,7 +132,17 @@ export function drawSnake(ctx, snake, theme, { quality = 'high', lod = 0, time =
     ctx.restore();
   }
 
-  // ── Pasada 5: patrón ──
+  // ── Pasada 5: highlight superior (efecto 3D) ──
+  if (quality === 'high') {
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.strokeStyle = rgba('#ffffff', 0.12);
+    ctx.lineWidth = r * 1.1;
+    ctx.stroke(path);
+    ctx.restore();
+  }
+
+  // ── Pasada 6: patrón ──
   if (skin.pattern && skin.pattern !== 'liso' && quality !== 'low') {
     drawPattern(ctx, path, snake, theme, skin, time);
   }
@@ -209,6 +230,41 @@ function drawPattern(ctx, path, snake, theme, skin, time) {
       ctx.setLineDash([r * 0.8, r * 5]);
       ctx.lineDashOffset = -time * 260;
       break;
+    case 'diamantes':
+      ctx.strokeStyle = rgba(c2, 0.8);
+      ctx.lineWidth = r * 0.7;
+      ctx.setLineDash([r * 0.4, r * 2.2]);
+      ctx.lineCap = 'round';
+      ctx.lineDashOffset = -snake.traveled * 0.8;
+      break;
+    case 'escamas3d':
+      ctx.strokeStyle = rgba(skin.head, 0.5);
+      ctx.lineWidth = r * 1.6;
+      ctx.setLineDash([r * 1.1, r * 0.6]);
+      ctx.lineDashOffset = -snake.traveled * 0.65;
+      break;
+    case 'zigzag':
+      ctx.strokeStyle = rgba(c2, 0.85);
+      ctx.lineWidth = r * 0.8;
+      ctx.setLineDash([r * 0.6, r * 1.4, r * 0.6, r * 1.4]);
+      ctx.lineCap = 'round';
+      ctx.lineDashOffset = -snake.traveled * 1.2;
+      break;
+    case 'flores':
+      ctx.strokeStyle = rgba(skin.head, 0.6);
+      ctx.lineWidth = r * 0.5;
+      ctx.setLineDash([0.1, r * 3.5]);
+      ctx.lineCap = 'round';
+      ctx.lineDashOffset = -snake.traveled * 0.4;
+      break;
+    case 'galaxia':
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.strokeStyle = rgba(skin.head, 0.45);
+      ctx.lineWidth = r * 0.45;
+      ctx.setLineDash([0.1, r * 2.8]);
+      ctx.lineCap = 'round';
+      ctx.lineDashOffset = -time * 180;
+      break;
     default:
       ctx.restore();
       return;
@@ -233,17 +289,28 @@ function drawHead(ctx, snake, theme, skin, time, quality) {
     ctx.restore();
   }
 
-  // Cabeza
+  // Cabeza con gradiente radial para efecto 3D
+  ctx.save();
+  const headGrad = ctx.createRadialGradient(
+    h.x - Math.cos(a) * r * 0.25, h.y - Math.sin(a) * r * 0.25, r * 0.1,
+    h.x, h.y, r * 1.04
+  );
+  headGrad.addColorStop(0, mixHex(skin.head, '#ffffff', 0.35));
+  headGrad.addColorStop(0.7, skin.head);
+  headGrad.addColorStop(1, mixHex(skin.head, '#000000', 0.35));
+  ctx.fillStyle = headGrad;
   ctx.beginPath();
   ctx.arc(h.x, h.y, r * 1.04, 0, Math.PI * 2);
-  if (head.outline > 0) {
-    ctx.fillStyle = head.outlineColor ?? '#12140f';
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(h.x, h.y, r * 1.04 - head.outline, 0, Math.PI * 2);
-  }
-  ctx.fillStyle = skin.head;
   ctx.fill();
+  ctx.restore();
+
+  if (head.outline > 0) {
+    ctx.strokeStyle = head.outlineColor ?? '#12140f';
+    ctx.lineWidth = head.outline;
+    ctx.beginPath();
+    ctx.arc(h.x, h.y, r * 1.04, 0, Math.PI * 2);
+    ctx.stroke();
+  }
 
   if (head.highlight && quality === 'high') {
     ctx.save();
@@ -271,15 +338,15 @@ function drawEyes(ctx, snake, theme, skin, time) {
   // cara de personaje, unos pequeños dan aspecto de criatura. Es la diferencia
   // visual más barata que existe entre temas.
   const scale = cfg.scale ?? 1;
-  const spread = style === 'ciclope' ? 0 : (cfg.spread ?? 0.52);
-  const offset = r * (style === 'ciclope' ? 0.28 : (cfg.offset ?? 0.46));
-  const eyeR = r * scale * (style === 'ciclope' ? 0.42 : style === 'rasgados' ? 0.3 : 0.31);
+  const spread = style === 'ciclope' || style === 'alien' ? 0 : (cfg.spread ?? 0.52);
+  const offset = r * (style === 'ciclope' ? 0.28 : style === 'alien' ? 0.38 : (cfg.offset ?? 0.46));
+  const eyeR = r * scale * (style === 'ciclope' ? 0.42 : style === 'alien' ? 0.38 : style === 'gato' ? 0.34 : style === 'demonio' ? 0.35 : 0.31);
 
   // Mirada: apunta hacia donde gira, lo que da intención al movimiento.
   const gaze = snake.targetAngle;
   const gazeOff = Math.max(-0.5, Math.min(0.5, ((gaze - a + Math.PI * 3) % (Math.PI * 2)) - Math.PI));
 
-  const angles = style === 'ciclope' ? [a] : [a - spread, a + spread];
+  const angles = style === 'ciclope' || style === 'alien' ? [a] : [a - spread, a + spread];
 
   if (style === 'visor') {
     ctx.save();
@@ -305,29 +372,76 @@ function drawEyes(ctx, snake, theme, skin, time) {
     ctx.save();
     ctx.translate(ex, ey);
     ctx.rotate(a);
-    ctx.fillStyle = cfg.sclera ?? '#ffffff';
-    ctx.beginPath();
-    if (style === 'rasgados') {
-      ctx.ellipse(0, 0, eyeR * 1.25, eyeR * blink * 0.62, 0, 0, Math.PI * 2);
-    } else if (style === 'dormilon') {
-      ctx.ellipse(0, eyeR * 0.2, eyeR, eyeR * blink * 0.48, 0, 0, Math.PI * 2);
+
+    if (style === 'gato') {
+      // Ojos de gato: slit pupil vertical con brillo
+      ctx.fillStyle = cfg.sclera ?? '#ffffff';
+      ctx.beginPath();
+      ctx.ellipse(0, 0, eyeR * 1.1, eyeR * blink * 1.1, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = cfg.pupil ?? '#101418';
+      ctx.beginPath();
+      ctx.ellipse(gazeOff * eyeR * 0.3, 0, eyeR * 0.22, eyeR * blink * 0.9, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // Brillo
+      ctx.fillStyle = '#ffffff';
+      ctx.globalAlpha = 0.7;
+      ctx.beginPath();
+      ctx.arc(-eyeR * 0.25, -eyeR * 0.3, eyeR * 0.18, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (style === 'demonio') {
+      // Ojos de demonio: rojos intensos con pupilas pequeñas
+      ctx.fillStyle = '#ff2a2a';
+      ctx.beginPath();
+      ctx.ellipse(0, 0, eyeR * 1.15, eyeR * blink * 1.05, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#ffff00';
+      ctx.beginPath();
+      ctx.arc(gazeOff * eyeR * 0.3, 0, eyeR * 0.28, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (style === 'alien') {
+      // Ojos de alien: grandes y negros
+      ctx.fillStyle = cfg.sclera ?? '#111111';
+      ctx.beginPath();
+      ctx.ellipse(0, 0, eyeR * 1.3, eyeR * blink * 1.2, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#000000';
+      ctx.beginPath();
+      ctx.arc(gazeOff * eyeR * 0.4, 0, eyeR * 0.55, 0, Math.PI * 2);
+      ctx.fill();
+      // Brillo pequeño
+      ctx.fillStyle = '#ffffff';
+      ctx.globalAlpha = 0.5;
+      ctx.beginPath();
+      ctx.arc(-eyeR * 0.2, -eyeR * 0.25, eyeR * 0.12, 0, Math.PI * 2);
+      ctx.fill();
     } else {
-      ctx.ellipse(0, 0, eyeR, eyeR * blink, 0, 0, Math.PI * 2);
-    }
-    ctx.fill();
+      // Ojos normales (redondos, rasgados, dormilon)
+      ctx.fillStyle = cfg.sclera ?? '#ffffff';
+      ctx.beginPath();
+      if (style === 'rasgados') {
+        ctx.ellipse(0, 0, eyeR * 1.25, eyeR * blink * 0.62, 0, 0, Math.PI * 2);
+      } else if (style === 'dormilon') {
+        ctx.ellipse(0, eyeR * 0.2, eyeR, eyeR * blink * 0.48, 0, 0, Math.PI * 2);
+      } else {
+        ctx.ellipse(0, 0, eyeR, eyeR * blink, 0, 0, Math.PI * 2);
+      }
+      ctx.fill();
 
-    if (cfg.outline > 0) {
-      ctx.strokeStyle = cfg.outlineColor ?? '#12140f';
-      ctx.lineWidth = cfg.outline;
-      ctx.stroke();
+      if (cfg.outline > 0) {
+        ctx.strokeStyle = cfg.outlineColor ?? '#12140f';
+        ctx.lineWidth = cfg.outline;
+        ctx.stroke();
+      }
+
+      // Pupila
+      ctx.fillStyle = cfg.pupil ?? '#101418';
+      ctx.beginPath();
+      const px = eyeR * 0.36 + gazeOff * eyeR * 0.5;
+      ctx.ellipse(px, 0, eyeR * 0.48, eyeR * 0.5 * blink, 0, 0, Math.PI * 2);
+      ctx.fill();
     }
 
-    // Pupila
-    ctx.fillStyle = cfg.pupil ?? '#101418';
-    ctx.beginPath();
-    const px = eyeR * 0.36 + gazeOff * eyeR * 0.5;
-    ctx.ellipse(px, 0, eyeR * 0.48, eyeR * 0.5 * blink, 0, 0, Math.PI * 2);
-    ctx.fill();
     ctx.restore();
   }
 }

@@ -32,6 +32,7 @@ export const MenuScreen = {
     fps: { type: Number, default: 0 },
     offlineReady: { type: Boolean, default: false },
     canInstall: { type: Boolean, default: false },
+    updateReady: { type: Function, default: null },
   },
   emits: ['play', 'setting', 'appearance', 'name', 'mode', 'install'],
 
@@ -53,6 +54,17 @@ export const MenuScreen = {
       emit('play', id);
     }
 
+    // Si hay una actualización pendiente al entrar al menú, la aplicamos
+    // automáticamente tras un breve instante para que la PWA instalada no se
+    // quede con la versión antigua en caché.
+    Vue.onMounted(() => {
+      if (props.updateReady) {
+        setTimeout(() => {
+          try { props.updateReady(); } catch {}
+        }, 1500);
+      }
+    });
+
     return {
       panel, dialogOpen, mode, modeName,
       achievements, done, stats, start,
@@ -65,6 +77,13 @@ export const MenuScreen = {
 
         <!-- ══ INICIO ══ -->
         <template v-if="panel === 'inicio'">
+          <div v-if="updateReady" class="update-banner">
+            <span>Hay una nueva versión disponible</span>
+            <button class="btn btn--primary" type="button" @click="updateReady()">
+              Actualizar ahora
+            </button>
+          </div>
+
           <h1 class="logo">
             <span class="logo__mark" aria-hidden="true">
               <svg viewBox="0 0 48 48" width="52" height="52">

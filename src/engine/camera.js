@@ -65,7 +65,7 @@ export class Camera {
       }
     }
 
-    this.zoom = damp(this.zoom, this.targetZoom, c.smoothZoom, dt);
+    this.zoom = damp(this.zoom, this.targetZoom, 2.0, dt);
     this.shakeX = shake.x;
     this.shakeY = shake.y;
   }

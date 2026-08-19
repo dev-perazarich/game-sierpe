@@ -29,6 +29,11 @@ export const PATTERNS = [
   { id: 'punteado',  label: 'Punteado' },
   { id: 'degradado', label: 'Degradado' },
   { id: 'pulso',     label: 'Pulso' },
+  { id: 'diamantes', label: 'Diamantes' },
+  { id: 'escamas3d', label: 'Escamas 3D' },
+  { id: 'zigzag',    label: 'Zigzag' },
+  { id: 'flores',    label: 'Flores' },
+  { id: 'galaxia',   label: 'Galaxia' },
 ];
 
 export const EYE_STYLES = [
@@ -37,6 +42,9 @@ export const EYE_STYLES = [
   { id: 'dormilon',  label: 'Dormilón' },
   { id: 'ciclope',   label: 'Cíclope' },
   { id: 'visor',     label: 'Visor' },
+  { id: 'gato',      label: 'Gato' },
+  { id: 'demonio',   label: 'Demonio' },
+  { id: 'alien',     label: 'Alien' },
 ];
 
 export const TRAILS = [
@@ -44,6 +52,9 @@ export const TRAILS = [
   { id: 'burbujas',   label: 'Burbujas' },
   { id: 'humo',       label: 'Humo' },
   { id: 'fragmentos', label: 'Fragmentos' },
+  { id: 'fuego',      label: 'Fuego' },
+  { id: 'nieve',      label: 'Nieve' },
+  { id: 'arcoiris',   label: 'Arcoíris' },
 ];
 
 /** Luminancia relativa, para la comprobación de contraste. */
@@ -109,7 +120,7 @@ export function botSkin(index, theme) {
   const hue = (index * 47) % 360;
   const primary = hslHex(hue, 68, 58);
   const secondary = hslHex((hue + 22) % 360, 60, 40);
-  const patterns = ['liso', 'rayas', 'bandas', 'escamas', 'punteado'];
+  const patterns = ['liso', 'rayas', 'bandas', 'escamas', 'punteado', 'diamantes', 'zigzag'];
   return buildSkin({
     primary,
     secondary,

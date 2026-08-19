@@ -194,7 +194,7 @@ export class Renderer {
       const lod = far ? 1 : 0;
 
       drawSnake(ctx, s, theme, { quality, lod, time: this.time });
-      fx.trail(s, theme);
+      fx.trail(s, theme, s.skin.trail);
       visible.push(s);
     }
 

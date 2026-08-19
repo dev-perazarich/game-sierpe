@@ -64,6 +64,7 @@ const app = createApp({
       :fps="fps"
       :offline-ready="offlineReady"
       :can-install="canInstall"
+      :update-ready="updateReady"
       @play="startGame"
       @setting="onSetting"
       @appearance="onAppearance"
@@ -168,7 +169,25 @@ const app = createApp({
 
       // ── Aplicación instalable ──
       registerServiceWorker({
-        onUpdateReady: (apply) => { updateReady.value = apply; },
+        onUpdateReady: (apply) => {
+          // Si estamos en el menú, aplicamos automáticamente para que la PWA
+          // instalada no se quede con la versión antigua en caché. En partida
+          // se pospone y se muestra el aviso en el HUD.
+          if (screen.value === 'menu') {
+            apply();
+          } else {
+            updateReady.value = apply;
+          }
+        },
+      });
+
+      // Cuando volvemos al menú y hay una actualización pendiente, la aplicamos
+      // automáticamente (por ejemplo, al terminar una partida sin minimizar).
+      Vue.watch(screen, (s) => {
+        if (s === 'menu' && updateReady.value) {
+          updateReady.value();
+          updateReady.value = null;
+        }
       });
       const install = installPrompt({ onAvailable: (v) => { canInstall.value = v; } });
       promptInstall = () => install.prompt();
@@ -369,7 +388,11 @@ const app = createApp({
 
       const p = world.player;
       if (p?.alive) {
-        const aim = input.aim(p, camera);
+        // Capturamos la intención cruda del jugador (sin suavizar).
+        input.aim(p, camera);
+        // Suavizamos esa intención antes de aplicarla a la serpiente.
+        input.update(dt);
+        const aim = input.getTargetAngle();
         if (aim !== null) p.targetAngle = aim;
         p.boosting = input.wantsBoost() && p.canBoost();
       }

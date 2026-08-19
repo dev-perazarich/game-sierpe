@@ -16,28 +16,28 @@ export const CFG = {
   // Densidad de comida en orbes por cada millón de píxeles cuadrados.
   // Fijar densidad en vez de un número absoluto evita que un mapa grande quede
   // vacío y uno pequeño saturado.
-  orbDensity: 38,
+  orbDensity: 42,
 
   snake: {
-    baseSpeed:  158,   // px/s
-    boostSpeed: 306,   // px/s
+    baseSpeed:  172,   // px/s
+    boostSpeed: 332,   // px/s
     startMass:  14,
     minMass:    9,     // por debajo no se puede acelerar
 
-    boostMassPerSec: 6.2,
-    boostOrbEvery:   0.11,   // s entre orbes soltados por la cola
+    boostMassPerSec: 5.8,
+    boostOrbEvery:   0.10,   // s entre orbes soltados por la cola
 
     // rad/s. El radio del círculo que traza la cabeza es velocidad / esta cifra:
     // con 158 px/s, 7.4 rad/s da un círculo de 21 px y 3.3 rad/s uno de 48 px.
     // Los valores anteriores (5.4 y 1.85) daban 29 px y 85 px: girar sobre uno
     // mismo describía una curva demasiado abierta, sobre todo siendo grande.
-    turnRateSmall: 7.4,      // rad/s siendo delgada
-    turnRateBig:   3.3,      // rad/s siendo enorme
+    turnRateSmall: 6.2,      // rad/s siendo delgada
+    turnRateBig:   2.6,      // rad/s siendo enorme
 
     radiusMin: 7,
     radiusMax: 30,
     massForMaxRadius: 950,
-    radiusEase: 3.5,         // 1/s con que el grosor persigue a la masa
+    radiusEase: 4.2,         // 1/s con que el grosor persigue a la masa
 
     bodyArcBase:    76,      // px de cuerpo con masa 0
     bodyArcPerMass: 2.0,
@@ -64,38 +64,38 @@ export const CFG = {
     rMax: 8.5,
     count: 620,
     valuePerRadius: 0.78,
-    magnetRange: 52,
+    magnetRange: 68,
     magnetSpeed: 620,
-    dropSpread: 26,
+    dropSpread: 30,
   },
 
   camera: {
     zoomMax: 1.0,
-    zoomMin: 0.52,
+    zoomMin: 0.48,
     lookahead: 0,        // 0 = cabeza clavada en el centro. Ver camera.js.
     smoothPos: 9,
-    smoothZoom: 2.4,
+    smoothZoom: 2.2,
   },
 
   ai: {
     rays: 24,
-    perceptionEvery: 3,      // pasos entre reconstrucciones del mapa de peligro
+    perceptionEvery: 2,      // pasos entre reconstrucciones del mapa de peligro
     traceSteps: 8,           // profundidad de la prueba anti-suicidio
     traceStepTime: 0.09,     // s simulados por paso de traza
-    stateMinTime: 0.45,      // histéresis: tiempo mínimo en un estado
-    stateMargin: 0.12,       // margen de utilidad para cambiar
-    perceptionRadius: 620,
+    stateMinTime: 0.32,      // histéresis: tiempo mínimo en un estado
+    stateMargin: 0.10,       // margen de utilidad para cambiar
+    perceptionRadius: 700,
   },
 
   fx: {
     particleBudget: { low: 0, medium: 340, high: 900 },
-    shakeDecay: 6.5,
-    hitstop: 0.06,
+    shakeDecay: 5.8,
+    hitstop: 0.08,
   },
 
   scoring: {
-    killMassShare: 0.35,     // fracción de la masa de la víctima que va al asesino
-    deathOrbFraction: 0.62,  // fracción de la masa que se convierte en orbes
+    killMassShare: 0.40,     // fracción de la masa de la víctima que va al asesino
+    deathOrbFraction: 0.70,  // fracción de la masa que se convierte en orbes
     deathOrbMax: 160,
   },
 };

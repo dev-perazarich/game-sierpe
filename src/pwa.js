@@ -42,6 +42,18 @@ export function registerServiceWorker({ onUpdateReady } = {}) {
           }
         });
       });
+
+      // Si hay una actualización esperando y la app vuelve a primer plano,
+      // la activamos automáticamente para que la PWA instalada no se quede
+      // con la versión antigua en caché.
+      const tryActivateWaiting = () => {
+        if (registration.waiting && navigator.serviceWorker.controller) {
+          onUpdateReady?.(() => activateUpdate(registration));
+        }
+      };
+      window.addEventListener('visibilitychange', tryActivateWaiting);
+      // También al cargar, por si el SW pasó a waiting mientras la app estaba cerrada.
+      tryActivateWaiting();
     } catch (err) {
       console.warn('[pwa] no se pudo registrar el service worker:', err);
     }

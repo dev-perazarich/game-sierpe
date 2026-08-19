@@ -11,8 +11,47 @@
 
 import { CFG } from '../config.js';
 import { EV } from '../engine/events.js';
-import { rgba, clamp } from '../engine/math.js';
+import { rgba, clamp, mixHex } from '../engine/math.js';
 import { particleSprite, tinted, drawSprite } from './sprites.js';
+
+const TRAIL_CFG = {
+  chispas:    { life: 0.55, size: 5,  gravity: 0 },
+  burbujas:   { life: 0.7,  size: 4,  gravity: -6 },
+  humo:       { life: 0.9,  size: 7,  gravity: -3 },
+  fragmentos: { life: 0.5,  size: 3.5, gravity: 0 },
+  fuego:      { life: 0.45, size: 6,  gravity: -18, color: (glow) => mixHex(glow, '#ff5500', 0.6) },
+  nieve:      { life: 0.8,  size: 3.5, gravity: 4, color: '#c8e6ff' },
+  arcoiris:   { life: 0.6,  size: 4.5, gravity: 0, color: () => rainbowColor() },
+};
+
+let _rainbowHue = 0;
+function rainbowColor() {
+  _rainbowHue = (_rainbowHue + 37) % 360;
+  const { r, g, b } = hslToRgb(_rainbowHue / 360, 0.9, 0.6);
+  return `rgb(${r},${g},${b})`;
+}
+
+function hslToRgb(h, s, l) {
+  let r, g, b;
+  if (s === 0) {
+    r = g = b = l;
+  } else {
+    const hue2rgb = (p, q, t) => {
+      if (t < 0) t += 1;
+      if (t > 1) t -= 1;
+      if (t < 1/6) return p + (q - p) * 6 * t;
+      if (t < 1/2) return q;
+      if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+      return p;
+    };
+    const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    const p = 2 * l - q;
+    r = hue2rgb(p, q, h + 1/3);
+    g = hue2rgb(p, q, h);
+    b = hue2rgb(p, q, h - 1/3);
+  }
+  return { r: Math.round(r * 255), g: Math.round(g * 255), b: Math.round(b * 255) };
+}
 
 class Particle {
   constructor() { this.alive = false; }
@@ -90,7 +129,7 @@ export class FX {
         this.burst(orb.x, orb.y, 8, '#8bd450', { speed: 90, life: 0.5, size: 4 });
         return;
       }
-      const n = snake.isPlayer ? 4 : 2;
+      const n = snake.isPlayer ? 6 : 2;
       this.burst(orb.x, orb.y, n, `hsl(${orb.hue},95%,68%)`, { speed: 70, life: 0.32, size: orb.r * 0.9 });
     });
 
@@ -194,7 +233,7 @@ export class FX {
   }
 
   /** Estela de turbo: se llama cada paso desde el renderizador. */
-  trail(snake, theme) {
+  trail(snake, theme, trailType = 'chispas') {
     if (this.reduced || this.budget === 0) return;
     if (!snake.boosting) return;
     if (Math.random() > 0.55) return;
@@ -203,10 +242,13 @@ export class FX {
     const t = snake.spine;
     const tx = t[t.length - 2], ty = t[t.length - 1];
     const a = snake.angle + Math.PI + (Math.random() - 0.5) * 1.1;
-    const style = theme.particles?.trail ?? {};
-    p.spawn(tx, ty, Math.cos(a) * 60, Math.sin(a) * 60,
-      style.life ?? 0.55, (style.size ?? 5) * (0.6 + Math.random() * 0.7),
-      snake.skin.glow, { drag: 2.8, gravity: style.gravity ?? 0 });
+    const base = theme.particles?.trail ?? {};
+    const cfg = TRAIL_CFG[trailType] ?? TRAIL_CFG['chispas'];
+    const life = cfg.life ?? base.life ?? 0.55;
+    const size = (cfg.size ?? base.size ?? 5) * (0.6 + Math.random() * 0.7);
+    const color = cfg.color ? (typeof cfg.color === 'function' ? cfg.color(snake.skin.glow) : cfg.color) : snake.skin.glow;
+    const gravity = cfg.gravity ?? base.gravity ?? 0;
+    p.spawn(tx, ty, Math.cos(a) * 60, Math.sin(a) * 60, life, size, color, { drag: 2.8, gravity });
   }
 
   ring(x, y, r0, r1, life, color, width = 3) {
